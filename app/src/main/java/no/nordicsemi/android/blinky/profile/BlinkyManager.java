@@ -198,8 +198,8 @@ public class BlinkyManager extends ObservableBleManager {
 			return;
 
 		// No need to change?
-		if (ledOn == on)
-			return;
+		//if (ledOn == on)
+		//	return;
 
 		log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
 		writeCharacteristic(ledCharacteristic,

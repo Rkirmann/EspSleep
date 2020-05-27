@@ -79,7 +79,7 @@ public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.ViewHold
 		final DiscoveredBluetoothDevice device = devices.get(position);
 		final String deviceName = device.getName();
 
-
+		// Auto connect to UART
 		if (device.getName() != null && device.getName().equals("UART Service")) {
 			onItemClickListener.onItemClick(device);
 		}

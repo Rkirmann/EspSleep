@@ -34,6 +34,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import java.util.logging.Logger;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -125,8 +127,15 @@ public class BlinkyActivity extends AppCompatActivity {
 	private void onConnectionStateChanged(final boolean connected) {
 		led.setEnabled(connected);
 		if (!connected) {
-			led.setChecked(false);
+			//led.setChecked(false);
+			System.out.println("system offline");
 			buttonState.setText(R.string.button_unknown);
-		} 
+			viewModel.reconnect();
+		} else {
+			System.out.println("system back online");
+			System.out.println("led is checked: " + led.isChecked());
+			viewModel.setLedState(led.isChecked());
+
+		}
 	}
 }

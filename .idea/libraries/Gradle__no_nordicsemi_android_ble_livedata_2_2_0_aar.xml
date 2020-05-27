@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: no.nordicsemi.android:ble-livedata:2.2.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e31e8130edf4cb5053dfe5af44ac9f36/jetified-ble-livedata-2.2.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e31e8130edf4cb5053dfe5af44ac9f36/jetified-ble-livedata-2.2.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/no.nordicsemi.android/ble-livedata/2.2.0/ab232e2342d4f0ac1c11561c3e8e7d59e2203cf7/ble-livedata-2.2.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/no.nordicsemi.android/ble-livedata/2.2.0/940d1217bb6d02b944a570bc053d79cdf7e76b32/ble-livedata-2.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

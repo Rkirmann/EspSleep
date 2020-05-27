@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: no.nordicsemi.android:log:2.2.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2d7099c07fa7424929e9ca7803340d80/jetified-log-2.2.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2d7099c07fa7424929e9ca7803340d80/jetified-log-2.2.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/no.nordicsemi.android/log/2.2.0/ecd4f59e9ca181b3d8668581da0f5fb81e919d55/log-2.2.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/no.nordicsemi.android/log/2.2.0/85cd689553e0d5f0ca52bd7c5eee3ece7732d/log-2.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -125,7 +125,7 @@ public class BlinkyActivity extends AppCompatActivity {
 	}
 
 	private void onConnectionStateChanged(final boolean connected) {
-		led.setEnabled(connected);
+		//led.setEnabled(connected);
 		if (!connected) {
 			//led.setChecked(false);
 			System.out.println("system offline");

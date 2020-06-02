@@ -117,7 +117,16 @@
 					android:layout_width="match_parent"
 					android:layout_height="match_parent">
 
-					<com.google.android.material.appbar.MaterialToolbar
+					<TimePicker
+						android:id="@+id/datePicker1"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						app:layout_constraintLeft_toLeftOf="parent"
+						app:layout_constraintRight_toRightOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						android:timePickerMode="spinner"/>
+
+					<!--<com.google.android.material.appbar.MaterialToolbar
 						android:id="@+id/button_tool_bar"
 						android:layout_width="0dp"
 						android:layout_height="?actionBarSize"
@@ -137,7 +146,7 @@
 						android:text="@string/button_summary"
 						android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
 						app:layout_constraintLeft_toLeftOf="parent"
-						app:layout_constraintTop_toBottomOf="@+id/button_tool_bar" />
+						app:layout_constraintTop_toBottomOf="@+id/button_tool_bar" />  -->
 
 					<com.google.android.material.textview.MaterialTextView
 						android:id="@+id/textView"
@@ -146,8 +155,8 @@
 						android:padding="@dimen/activity_horizontal_margin"
 						android:text="@string/state"
 						android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-						app:layout_constraintLeft_toLeftOf="parent"
-						app:layout_constraintTop_toBottomOf="@+id/button_summary" />
+						app:layout_constraintLeft_toLeftOf="parent" />
+						<!--app:layout_constraintTop_toBottomOf="@+id/button_summary"-->
 
 					<com.google.android.material.textview.MaterialTextView
 						android:id="@+id/button_state"

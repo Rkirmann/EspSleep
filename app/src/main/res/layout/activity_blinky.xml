@@ -119,12 +119,12 @@
 
 					<TimePicker
 						android:id="@+id/datePicker1"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
+						android:layout_width="248dp"
+						android:layout_height="150dp"
+						android:timePickerMode="spinner"
 						app:layout_constraintLeft_toLeftOf="parent"
 						app:layout_constraintRight_toRightOf="parent"
-						app:layout_constraintTop_toTopOf="parent"
-						android:timePickerMode="spinner"/>
+						app:layout_constraintTop_toBottomOf="@+id/button_state" />
 
 					<!--<com.google.android.material.appbar.MaterialToolbar
 						android:id="@+id/button_tool_bar"

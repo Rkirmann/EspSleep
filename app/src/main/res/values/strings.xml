@@ -31,9 +31,9 @@
 	<string name="unknown_device">Unknown Device</string>
 	<string name="turn_on">On</string>
 	<string name="turn_off">Off</string>
-	<string name="title_led_state">LED</string>
+	<string name="title_led_state">Alarm</string>
 	<string name="title_button_state">Button</string>
-	<string name="state">State</string>
+	<string name="state">Current wakeup-time</string>
 	<string name="button_pressed">Pressed</string>
 	<string name="button_released">Released</string>
 	<string name="button_unknown">Unknown</string>

@@ -105,6 +105,15 @@ public class BlinkyViewModel extends AndroidViewModel {
 		blinkyManager.turnLed(on);
 	}
 
+	/**
+	 * Sends time
+	 *
+	 * The value is the number of seconds since Jan 1, 1970
+	* */
+	public void setTime(final long sec){
+		blinkyManager.sendTime(sec);
+	}
+
 	@Override
 	protected void onCleared() {
 		super.onCleared();

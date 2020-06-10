@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: no.nordicsemi.android:log:2.2.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/04ed18e81e14b1eacf233aa7b953496f/jetified-log-2.2.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/04ed18e81e14b1eacf233aa7b953496f/jetified-log-2.2.0/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e93f74d6780830714b07927bd83a87a5/jetified-log-2.2.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e93f74d6780830714b07927bd83a87a5/jetified-log-2.2.0/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/no.nordicsemi.android/log/2.2.0/ecd4f59e9ca181b3d8668581da0f5fb81e919d55/log-2.2.0-javadoc.jar!/" />

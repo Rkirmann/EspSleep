@@ -39,4 +39,9 @@ public final class BlinkyLED {
     public static Data turnOff() {
         return Data.opCode( (byte) STATE_OFF);
     }
+
+    @NonNull
+    public static Data setTime(final long sec){
+        return Data.from(String.valueOf(sec));
+    }
 }

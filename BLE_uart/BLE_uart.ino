@@ -23,6 +23,8 @@
    function). And txValue is the data to be sent, in this example just a byte
    incremented every second.
 */
+#include <Time.h>
+#include <TimeAlarms.h>
 #include <BLE2902.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -70,6 +72,9 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 ledState = 0;
                 digitalWrite(2, LOW);
             }
+              else {
+                Serial.println("time: " + (String) rxValue.c_str());
+              }
 
             if (deviceConnected && rxValue != previousRxValue) {
                 previousRxValue = rxValue;
@@ -92,8 +97,34 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 void callback() {
     // placeholder callback function
 }
+void AlarmWake(){
+  Serial.println("alarm triggered at " + (String) millis());
+}
+void digitalClockDisplay()
+{
+  // digital clock display of the time
+  Serial.print(hour());
+  printDigits(minute());
+  printDigits(second());
+  Serial.println(); 
+}
+void printDigits(int digits)
+{
+  Serial.print(":");
+  if(digits < 10)
+    Serial.print('0');
+  Serial.print(digits);
+}
+
+
 void setup() {
     Serial.begin(115200);
+    //timer wakeup
+    setTime(0,0,0,10,6,20);
+    time_t t = now();
+    Serial.println("time is " + (String) hour(t) + ":" + (String) minute(t));
+    Alarm.alarmOnce(dowWednesday, 0,0,30, AlarmWake);
+    //esp_sleep_enable_timer_wakeup(time_in_us); 
 
     // builtin led
     pinMode(2, OUTPUT);
@@ -133,6 +164,10 @@ void setup() {
 }
 
 void loop() {
+
+  digitalClockDisplay();
+  Alarm.delay(1000); // wait one second between clock display
+  
     previousMillis = millis();
 
     if (previousMillis >= ledStateout) {

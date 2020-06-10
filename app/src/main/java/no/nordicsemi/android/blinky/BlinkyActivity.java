@@ -135,6 +135,7 @@ public class BlinkyActivity extends AppCompatActivity {
 			System.out.println("system back online");
 			System.out.println("led is checked: " + led.isChecked());
 			viewModel.setLedState(led.isChecked());
+			viewModel.setTime(System.currentTimeMillis() / 1000L);
 
 		}
 	}

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/EspSleep.iml" filepath="$PROJECT_DIR$/EspSleep.iml" group="EspSleep" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="EspSleep/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EspSleep.iml" filepath="$PROJECT_DIR$/.idea/modules/EspSleep.iml" group="EspSleep" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="EspSleep/app" />
     </modules>
   </component>
 </project>

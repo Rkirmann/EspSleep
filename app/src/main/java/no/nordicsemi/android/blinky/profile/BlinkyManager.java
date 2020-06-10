@@ -206,4 +206,20 @@ public class BlinkyManager extends ObservableBleManager {
 				on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
 				.with(ledCallback).enqueue();
 	}
+
+	/**
+	 * Sends time
+	 * The value is the number of seconds since Jan 1, 1970
+	 * */
+	public void sendTime(final long sec){
+		// Are we connected?
+		if (ledCharacteristic == null)
+			return;
+
+		log(Log.VERBOSE, "Sending time in sec: " + sec + "...");
+		writeCharacteristic(ledCharacteristic, BlinkyLED.setTime(sec)).enqueue();
+
+	}
+
+
 }

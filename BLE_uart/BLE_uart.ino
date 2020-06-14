@@ -157,22 +157,24 @@ void setup() {
     // Serial.println(timeClient.getEpochTime());
     t = timeClient.getEpochTime();
     setTime(t);
+    digitalClockDisplay();
 
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
 
     // Serial.println("time is " + (String)hour() + ":" + (String)minute());
     // Alarm.alarmOnce(dowWednesday, 0, 0, 30, AlarmWake);
-    // set sleep wakeup after us
-    esp_sleep_enable_timer_wakeup(sleepTime*1000);
-
+    
     // builtin led
     pinMode(2, OUTPUT);
     digitalWrite(2, ledState);
+
     // Setup interrupt on Touch Pad 0 (GPIO2)
     touchAttachInterrupt(T0, callback, Threshold);
     // Configure Touchpad as wakeup source
     esp_sleep_enable_touchpad_wakeup();
+    // set sleep wakeup after us
+    esp_sleep_enable_timer_wakeup(sleepTime*1000);
 
     // START BLUETOOTH
     // Create the BLE Device
@@ -193,17 +195,20 @@ void setup() {
     pService->start();
     // Start advertising
     pServer->getAdvertising()->start();
-    Serial.println("Waiting a client connection to notify...");
+
+    if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_TOUCHPAD){
+        esp_deep_sleep_start();
+    }
+
 }
 
 void loop() {
     digitalClockDisplay();
     Alarm.delay(1000);  // wait one second between clock display
 
-    //previousMillis = millis();
-    
+    // go to sleep after some time
+    previousMillis = millis();
     if (previousMillis >= sleepTime) {
-        // Go to sleep now
         Serial.println("Going to sleep now");
         //t = now();
         esp_deep_sleep_start();

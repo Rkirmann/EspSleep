@@ -105,7 +105,7 @@ public class ScannerActivity extends AppCompatActivity implements DevicesAdapter
         super.onStop();
         stopScan();
     }
-
+    /*
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.filter, menu);
@@ -113,6 +113,7 @@ public class ScannerActivity extends AppCompatActivity implements DevicesAdapter
         menu.findItem(R.id.filter_nearby).setChecked(scannerViewModel.isNearbyFilterEnabled());
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
@@ -128,6 +129,8 @@ public class ScannerActivity extends AppCompatActivity implements DevicesAdapter
         }
         return super.onOptionsItemSelected(item);
     }
+    */
+
 
     @Override
     public void onItemClick(@NonNull final DiscoveredBluetoothDevice device) {

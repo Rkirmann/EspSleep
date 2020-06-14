@@ -1,0 +1,7 @@
+{
+    "programmer": "AVR ISP",
+    "board": "esp32:esp32:mhetesp32minikit",
+    "configuration": "FlashFreq=80,PartitionScheme=no_ota,UploadSpeed=115200,DebugLevel=none",
+    "sketch": "BLE_uart.ino",
+    "port": "COM3"
+}

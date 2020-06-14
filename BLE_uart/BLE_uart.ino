@@ -23,12 +23,23 @@
    function). And txValue is the data to be sent, in this example just a byte
    incremented every second.
 */
-#include <Time.h>
-#include <TimeAlarms.h>
 #include <BLE2902.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
+#include <NTPClient.h>
+#include <Time.h>
+#include <TimeAlarms.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
+const char *ssid = "SuveSindi2";
+const char *password = "pikkwifiparool";
+const char *ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = 10800;
+const int daylightOffset_sec = 3600;
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -36,12 +47,13 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint8_t txValue = 0;
 uint8_t pressed = 0;
+RTC_DATA_ATTR time_t t = 0;
 std::string previousRxValue = "";
 #define Threshold 40
 RTC_DATA_ATTR int ledState = 0;
 
-// ledStater
-const long ledStateout = 60000;  // interval at which to blink (milliseconds)
+// sleep timer
+const long sleepTime = 60000;  // go to sleep after ms
 unsigned long previousMillis = 0;
 
 // See the following for generating UUIDs:
@@ -57,7 +69,7 @@ class MyServerCallbacks : public BLEServerCallbacks {
 
     void onDisconnect(BLEServer *pServer) { deviceConnected = false; }
 };
-
+// BLE communicate
 class MyCallbacks : public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
         std::string rxValue = pCharacteristic->getValue();
@@ -71,10 +83,12 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             } else if (rxValue == "0") {
                 ledState = 0;
                 digitalWrite(2, LOW);
+            } else {
+                //  Serial.println("time: " + (String) rxValue.c_str());
+                //t = atol(rxValue.c_str());
+                //setTime(t);
+                ;
             }
-              else {
-                Serial.println("time: " + (String) rxValue.c_str());
-              }
 
             if (deviceConnected && rxValue != previousRxValue) {
                 previousRxValue = rxValue;
@@ -84,12 +98,18 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 pTxCharacteristic->notify();
             }
 
+            // print received value
             Serial.println("*********");
             Serial.print("Received Value: ");
-            for (int i = 0; i < rxValue.length(); i++) Serial.print(rxValue[i]);
-
+            for (int i = 0; i < rxValue.length(); i++) {
+                Serial.print(rxValue[i]);
+            }
             Serial.println();
             Serial.println("*********");
+
+            // sleep after alarm is set
+            Serial.println("Going to sleep now");
+            esp_deep_sleep_start();
         }
     }
 };
@@ -97,34 +117,54 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 void callback() {
     // placeholder callback function
 }
-void AlarmWake(){
-  Serial.println("alarm triggered at " + (String) millis());
+void AlarmWake() { Serial.println("alarm triggered at " + (String)millis()); }
+void digitalClockDisplay() {
+    // digital clock display of the time
+    Serial.print(hour());
+    printDigits(minute());
+    printDigits(second());
+    printDigits(day());
+    printDigits(month());
+    printDigits(year());
+    Serial.println();
 }
-void digitalClockDisplay()
-{
-  // digital clock display of the time
-  Serial.print(hour());
-  printDigits(minute());
-  printDigits(second());
-  Serial.println(); 
+void printDigits(int digits) {
+    Serial.print(":");
+    if (digits < 10) Serial.print('0');
+    Serial.print(digits);
 }
-void printDigits(int digits)
-{
-  Serial.print(":");
-  if(digits < 10)
-    Serial.print('0');
-  Serial.print(digits);
-}
-
 
 void setup() {
     Serial.begin(115200);
-    //timer wakeup
-    setTime(0,0,0,10,6,20);
-    time_t t = now();
-    Serial.println("time is " + (String) hour(t) + ":" + (String) minute(t));
-    Alarm.alarmOnce(dowWednesday, 0,0,30, AlarmWake);
-    //esp_sleep_enable_timer_wakeup(time_in_us); 
+    // setTime(t);
+    // t = now();
+
+    // Connect to Wi-Fi
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.println("WiFi connected.");
+
+    // get set time
+    timeClient.begin();
+    timeClient.setTimeOffset(gmtOffset_sec);
+    timeClient.update();
+    // Serial.println(timeClient.getEpochTime());
+    t = timeClient.getEpochTime();
+    setTime(t);
+
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+
+    // Serial.println("time is " + (String)hour() + ":" + (String)minute());
+    // Alarm.alarmOnce(dowWednesday, 0, 0, 30, AlarmWake);
+    // set sleep wakeup after us
+    esp_sleep_enable_timer_wakeup(sleepTime*1000);
 
     // builtin led
     pinMode(2, OUTPUT);
@@ -134,47 +174,41 @@ void setup() {
     // Configure Touchpad as wakeup source
     esp_sleep_enable_touchpad_wakeup();
 
+    // START BLUETOOTH
     // Create the BLE Device
     BLEDevice::init("UART Service");
-
     // Create the BLE Server
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
-
     // Create the BLE Service
     BLEService *pService = pServer->createService(SERVICE_UUID);
-
     // Create a BLE Characteristic
     pTxCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY);
-
     pTxCharacteristic->addDescriptor(new BLE2902());
-
     BLECharacteristic *pRxCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE);
-
     pRxCharacteristic->setCallbacks(new MyCallbacks());
-
     // Start the service
     pService->start();
-
     // Start advertising
     pServer->getAdvertising()->start();
     Serial.println("Waiting a client connection to notify...");
 }
 
 void loop() {
+    digitalClockDisplay();
+    Alarm.delay(1000);  // wait one second between clock display
 
-  digitalClockDisplay();
-  Alarm.delay(1000); // wait one second between clock display
-  
-    previousMillis = millis();
-
-    if (previousMillis >= ledStateout) {
+    //previousMillis = millis();
+    
+    if (previousMillis >= sleepTime) {
         // Go to sleep now
         Serial.println("Going to sleep now");
+        //t = now();
         esp_deep_sleep_start();
     }
+    
 
     /*
         if (deviceConnected) {

@@ -23,11 +23,14 @@
 package no.nordicsemi.android.blinky;
 
 import android.content.Intent;
+import android.icu.util.TimeZone;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -124,6 +127,7 @@ public class BlinkyActivity extends AppCompatActivity {
 		viewModel.reconnect();
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.N)
 	private void onConnectionStateChanged(final boolean connected) {
 		//led.setEnabled(connected);
 		if (!connected) {
@@ -135,7 +139,11 @@ public class BlinkyActivity extends AppCompatActivity {
 			System.out.println("system back online");
 			System.out.println("led is checked: " + led.isChecked());
 			viewModel.setLedState(led.isChecked());
-			viewModel.setTime(System.currentTimeMillis() / 1000L);
+
+			int offset = java.util.TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
+			long now = System.currentTimeMillis() + offset;
+			viewModel.setTime(now / 1000L);
+			//viewModel.setTime(System.currentTimeMillis() / 1000L);
 
 		}
 	}

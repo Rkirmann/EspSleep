@@ -29,6 +29,7 @@
 	<string name="menu_filter_nearby">Only nearby devices</string>
 
 	<string name="unknown_device">Unknown Device</string>
+	<string name="scanning">Scanning for the right device...</string>
 	<string name="turn_on">On</string>
 	<string name="turn_off">Off</string>
 	<string name="title_led_state">Alarm</string>

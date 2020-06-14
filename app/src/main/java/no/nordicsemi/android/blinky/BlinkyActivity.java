@@ -27,6 +27,7 @@ import android.icu.util.TimeZone;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -54,6 +55,7 @@ public class BlinkyActivity extends AppCompatActivity {
 
 	@BindView(R.id.led_switch) SwitchMaterial led;
 	@BindView(R.id.button_state) TextView buttonState;
+	//@BindView(R.id.sync) Button sync;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -83,7 +85,7 @@ public class BlinkyActivity extends AppCompatActivity {
 		final View content = findViewById(R.id.device_container);
 		final View notSupported = findViewById(R.id.not_supported);
 
-		led.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setLedState(isChecked));
+		//led.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setLedState(isChecked));
 		viewModel.getConnectionState().observe(this, state -> {
 			switch (state.getState()) {
 				case CONNECTING:
@@ -127,6 +129,15 @@ public class BlinkyActivity extends AppCompatActivity {
 		viewModel.reconnect();
 	}
 
+	@OnClick(R.id.sync)
+	public void onSyncClicked(){
+		viewModel.setLedState(led.isChecked());
+
+		int offset = java.util.TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
+		long now = System.currentTimeMillis() + offset;
+		viewModel.setTime(now / 1000L);
+	}
+
 	@RequiresApi(api = Build.VERSION_CODES.N)
 	private void onConnectionStateChanged(final boolean connected) {
 		//led.setEnabled(connected);
@@ -138,11 +149,7 @@ public class BlinkyActivity extends AppCompatActivity {
 		} else {
 			System.out.println("system back online");
 			System.out.println("led is checked: " + led.isChecked());
-			viewModel.setLedState(led.isChecked());
 
-			int offset = java.util.TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
-			long now = System.currentTimeMillis() + offset;
-			viewModel.setTime(now / 1000L);
 			//viewModel.setTime(System.currentTimeMillis() / 1000L);
 
 		}

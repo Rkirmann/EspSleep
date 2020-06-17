@@ -22,8 +22,13 @@
 
 package no.nordicsemi.android.blinky;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.icu.util.TimeZone;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -38,12 +43,14 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import no.nordicsemi.android.ble.livedata.state.ConnectionState;
+import no.nordicsemi.android.ble.utils.ILogger;
 import no.nordicsemi.android.blinky.adapter.DiscoveredBluetoothDevice;
 import no.nordicsemi.android.blinky.viewmodels.BlinkyViewModel;
 
@@ -52,10 +59,24 @@ public class BlinkyActivity extends AppCompatActivity {
 	public static final String EXTRA_DEVICE = "no.nordicsemi.android.blinky.EXTRA_DEVICE";
 
 	private BlinkyViewModel viewModel;
+	private WifiManager mWifiManager;
 
 	@BindView(R.id.led_switch) SwitchMaterial led;
 	@BindView(R.id.button_state) TextView buttonState;
 	//@BindView(R.id.sync) Button sync;
+
+	// wifi scanner
+	private final BroadcastReceiver mWifiScanReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context c, Intent intent) {
+			if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+				List<ScanResult> mScanResults = mWifiManager.getScanResults();
+				for (ScanResult mScanResult : mScanResults) {
+					System.out.println(mScanResult.SSID);
+				}
+			}
+		}
+	};
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -84,6 +105,12 @@ public class BlinkyActivity extends AppCompatActivity {
 		final TextView connectionState = findViewById(R.id.connection_state);
 		final View content = findViewById(R.id.device_container);
 		final View notSupported = findViewById(R.id.not_supported);
+
+		//wifi scanner
+		mWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+		registerReceiver(mWifiScanReceiver,
+				new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		mWifiManager.startScan();
 
 		//led.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setLedState(isChecked));
 		viewModel.getConnectionState().observe(this, state -> {

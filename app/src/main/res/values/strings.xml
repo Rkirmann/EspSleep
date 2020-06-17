@@ -33,6 +33,8 @@
 	<string name="turn_on">On</string>
 	<string name="turn_off">Off</string>
 	<string name="title_led_state">Alarm</string>
+	<string name="title_wifi">Wifi</string>
+	<string name="password">Password</string>
 	<string name="title_button_state">Button</string>
 	<string name="state">Current wakeup-time</string>
 	<string name="button_pressed">Pressed</string>

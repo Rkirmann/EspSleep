@@ -108,19 +108,32 @@
 						app:layout_constraintTop_toBottomOf="@+id/wifi_tool_bar"
 						app:srcCompat="@drawable/ic_baseline_arrow_back_ios_24" />
 
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/pass_text"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:padding="@dimen/activity_horizontal_margin"
+						android:text="@string/password"
+						android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/imageButton2"
+						app:layout_constraintTop_toBottomOf="@+id/ssid"
+						app:layout_constraintVertical_bias="0.0" />
+
 					<EditText
 						android:id="@+id/wifi_password"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginStart="10dp"
-						android:layout_marginEnd="10dp"
+						android:layout_marginEnd="20dp"
 						android:ems="10"
-						android:hint="@string/password"
 						android:importantForAutofill="no"
 						android:inputType="textPassword"
+						android:hint="@string/password"
 						app:layout_constraintEnd_toStartOf="@+id/imageButton"
-						app:layout_constraintStart_toEndOf="@+id/imageButton2"
+						app:layout_constraintStart_toEndOf="@+id/pass_text"
 						app:layout_constraintTop_toBottomOf="@+id/ssid"
+						app:passwordToggleDrawable="@drawable/password_toggle_drawable"
 						app:passwordToggleEnabled="true" />
 				</androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>

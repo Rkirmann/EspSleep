@@ -36,6 +36,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -60,20 +61,31 @@ public class BlinkyActivity extends AppCompatActivity {
 
 	private BlinkyViewModel viewModel;
 	private WifiManager mWifiManager;
+	private List<ScanResult> mScanResults;
 
-	@BindView(R.id.led_switch) SwitchMaterial led;
-	@BindView(R.id.button_state) TextView buttonState;
+	@BindView(R.id.led_switch)
+	SwitchMaterial led;
+	@BindView(R.id.button_state)
+	TextView buttonState;
 	//@BindView(R.id.sync) Button sync;
+	@BindView(R.id.ssid)
+	TextView ssid;
 
-	// wifi scanner
+
 	private final BroadcastReceiver mWifiScanReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context c, Intent intent) {
 			if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-				List<ScanResult> mScanResults = mWifiManager.getScanResults();
+				mScanResults = mWifiManager.getScanResults();
+				System.out.println("wifi scan results:");
 				for (ScanResult mScanResult : mScanResults) {
 					System.out.println(mScanResult.SSID);
 				}
+				String bssid = "no wifi found";
+				try {
+					bssid = mScanResults.get(0).SSID;
+				} catch (NullPointerException ignored){ }
+				ssid.setText(bssid);
 			}
 		}
 	};
@@ -106,11 +118,13 @@ public class BlinkyActivity extends AppCompatActivity {
 		final View content = findViewById(R.id.device_container);
 		final View notSupported = findViewById(R.id.not_supported);
 
+
 		//wifi scanner
 		mWifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 		registerReceiver(mWifiScanReceiver,
 				new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		mWifiManager.startScan();
+
 
 		//led.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setLedState(isChecked));
 		viewModel.getConnectionState().observe(this, state -> {
@@ -149,7 +163,11 @@ public class BlinkyActivity extends AppCompatActivity {
 		viewModel.getButtonState().observe(this,
 				pressed -> buttonState.setText(pressed ?
 						R.string.button_pressed : R.string.button_released));
+
+
 	}
+
+
 
 	@OnClick(R.id.action_clear_cache)
 	public void onTryAgainClicked() {

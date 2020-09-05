@@ -1,0 +1,29 @@
+package no.nordicsemi.android.test;
+
+import android.util.Log;
+
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import no.nordicsemi.android.blinky.utils.PasswordManager;
+
+
+public class ReadWriteTest {
+    private static final String TAG = "ReadWrite";
+    PasswordManager passwordManager;
+
+    @Before
+    public void init() {
+        Log.i(TAG, "initializing objects");
+        passwordManager = new PasswordManager();
+    }
+
+    @Test
+    public void testWrite() throws GeneralSecurityException, IOException {
+        passwordManager.write("Suvesindi", "pikkwifiparool");
+        assertEquals(1,1);
+    }
+}

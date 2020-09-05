@@ -89,7 +89,7 @@
 						app:layout_constraintTop_toBottomOf="@+id/wifi_tool_bar" />
 
 					<ImageButton
-						android:id="@+id/imageButton"
+						android:id="@+id/nextWifi"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginEnd="10dp"
@@ -100,7 +100,7 @@
 						app:srcCompat="@drawable/ic_baseline_arrow_forward_ios_24" />
 
 					<ImageButton
-						android:id="@+id/imageButton2"
+						android:id="@+id/prevWifi"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_marginStart="10dp"
@@ -120,8 +120,8 @@
 						android:hint="@string/password"
 						android:importantForAutofill="no"
 						android:inputType="textPassword"
-						app:layout_constraintEnd_toStartOf="@+id/imageButton"
-						app:layout_constraintStart_toEndOf="@+id/imageButton2"
+						app:layout_constraintEnd_toStartOf="@+id/prevWifi"
+						app:layout_constraintStart_toEndOf="@+id/nextWifi"
 						app:layout_constraintTop_toBottomOf="@+id/ssid"
 						app:passwordToggleEnabled="true" />
 				</androidx.constraintlayout.widget.ConstraintLayout>
@@ -240,6 +240,7 @@
                         android:layout_width="75dp"
                         android:layout_height="45dp"
                         android:text="sync"
+						android:enabled="false"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/datePicker1"

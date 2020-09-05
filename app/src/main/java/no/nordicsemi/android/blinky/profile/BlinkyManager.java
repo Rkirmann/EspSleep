@@ -55,6 +55,7 @@ public class BlinkyManager extends ObservableBleManager {
 
 	private final MutableLiveData<Boolean> ledState = new MutableLiveData<>();
 	private final MutableLiveData<Boolean> buttonState = new MutableLiveData<>();
+	private final MutableLiveData<Boolean> pwState = new MutableLiveData<>();
 
 	private BluetoothGattCharacteristic buttonCharacteristic, ledCharacteristic;
 	private LogSession logSession;
@@ -150,6 +151,7 @@ public class BlinkyManager extends ObservableBleManager {
 		}
 	};
 
+
 	/**
 	 * BluetoothGatt callbacks object.
 	 */
@@ -196,11 +198,9 @@ public class BlinkyManager extends ObservableBleManager {
 		// Are we connected?
 		if (ledCharacteristic == null)
 			return;
-
 		// No need to change?
 		//if (ledOn == on)
 		//	return;
-
 		log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
 		writeCharacteristic(ledCharacteristic,
 				on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
@@ -215,11 +215,26 @@ public class BlinkyManager extends ObservableBleManager {
 		// Are we connected?
 		if (ledCharacteristic == null)
 			return;
-
 		log(Log.VERBOSE, "Sending time in sec: " + sec + "...");
 		writeCharacteristic(ledCharacteristic, BlinkyLED.setTime(sec)).enqueue();
-
 	}
+
+	public void sendAlarm(int hour, int minute) {
+		if (ledCharacteristic == null)
+			return;
+		log(Log.VERBOSE, "Sending alarm: " + hour + ";" + minute +"...");
+		writeCharacteristic(ledCharacteristic, BlinkyLED.setAlarmHour(hour)).enqueue();
+		writeCharacteristic(ledCharacteristic, BlinkyLED.setAlarmMinute(minute)).enqueue();
+	}
+
+	public void sendWifiCredentials(String ssid, String pw) {
+		if (ledCharacteristic == null)
+			return;
+		log(Log.VERBOSE, "Sending wifi credentials");
+		writeCharacteristic(ledCharacteristic, BlinkyLED.setSSID(ssid)).enqueue();
+		writeCharacteristic(ledCharacteristic, BlinkyLED.setPW(pw)).enqueue();
+	}
+
 
 
 }

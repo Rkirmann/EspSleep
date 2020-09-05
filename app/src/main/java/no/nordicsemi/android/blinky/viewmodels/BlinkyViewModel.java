@@ -53,7 +53,6 @@ public class BlinkyViewModel extends AndroidViewModel {
 	public LiveData<Boolean> getButtonState() {
 		return blinkyManager.getButtonState();
 	}
-
 	public LiveData<Boolean> getLedState() {
 		return blinkyManager.getLedState();
 	}
@@ -107,11 +106,26 @@ public class BlinkyViewModel extends AndroidViewModel {
 
 	/**
 	 * Sends time
-	 *
 	 * The value is the number of seconds since Jan 1, 1970
 	* */
 	public void setTime(final long sec){
 		blinkyManager.sendTime(sec);
+	}
+
+	/**
+	 * Sends alarm time
+	 * The value is int hour and int minute
+	 * */
+	public void setAlarmTime(int hour, int minute) {
+		blinkyManager.sendAlarm(hour, minute);
+	}
+
+	/**
+	 * Sends wifi credentials
+	 * The value string ssid and pw
+	 * */
+	public void setWifi(String ssid, String pw) {
+		blinkyManager.sendWifiCredentials(ssid, pw);
 	}
 
 	@Override
@@ -121,4 +135,7 @@ public class BlinkyViewModel extends AndroidViewModel {
 			disconnect();
 		}
 	}
+
+
+
 }

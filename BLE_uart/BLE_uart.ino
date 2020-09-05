@@ -35,8 +35,8 @@
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
-const char *ssid = "SuveSindi2";
-const char *password = "pikkwifiparool";
+String ssid = "SuveSindi2";
+String password = "pikkwifiparool";
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 10800;
 const int daylightOffset_sec = 3600;
@@ -47,6 +47,7 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint8_t txValue = 0;
 uint8_t pressed = 0;
+uint8_t rxCase = 0;
 RTC_DATA_ATTR time_t t = 0;
 std::string previousRxValue = "";
 #define Threshold 40
@@ -77,19 +78,76 @@ class MyCallbacks : public BLECharacteristicCallbacks {
         if (rxValue.length() > 0) {
             previousMillis = 0;
 
-            if (rxValue == "1") {
+            switch (rxCase) {
+                case 0:
+                    if (rxValue == "+") {
+                        Serial.println("recevied LED state: " + (String)rxValue.c_str());
+                        ledState = 1;
+                        digitalWrite(2, HIGH);
+                    } else {
+                        Serial.println("received LED state: " + (String)rxValue.c_str());
+                        ledState = 0;
+                        digitalWrite(2, LOW);
+                    }
+                    rxCase++;
+                    break;
+                case 1:
+                    Serial.println("received time: " + (String)rxValue.c_str());
+                    t = atol(rxValue.c_str());
+                    setTime(t);
+                    rxCase++;
+                    break;
+                case 2:
+                    Serial.println("received alarm hour: " + (String)rxValue.c_str());
+                // TODO set alarm hour
+                    rxCase++;
+                    break;
+                case 3:
+                     Serial.println("received alarm minute: " + (String)rxValue.c_str());
+                // TODO set alarm minute
+                    rxCase++;
+                    break;
+                case 4:
+                    Serial.println("received ssid : " + (String)rxValue.c_str());
+                    ssid = (String)rxValue.c_str();
+                    rxCase++;
+                    break;
+                case 5:
+                    Serial.println("received password : " + (String)rxValue.c_str());
+                    password = (String)rxValue.c_str();
+                    rxCase = 0;
+                    break;
+            }
+/* 
+            if (rxValue == "+") {
+                Serial.println("recevied LED state: " +
+                               (String)rxValue.c_str());
                 ledState = 1;
                 digitalWrite(2, HIGH);
-            } else if (rxValue == "0") {
+            } else if (rxValue == "-") {
+                Serial.println("received LED state: " +
+                               (String)rxValue.c_str());
                 ledState = 0;
                 digitalWrite(2, LOW);
-            } else {
-                //  Serial.println("time: " + (String) rxValue.c_str());
-                //t = atol(rxValue.c_str());
-                //setTime(t);
-                ;
-            }
-
+            } else if (rxValue.length() > 3 && isNnumber(rxValue)) {
+                Serial.println("received time: " + (String)rxValue.c_str());
+                t = atol(rxValue.c_str());
+                setTime(t);
+            } else if (rxValue.length() < 4 &&
+                       (String)rxValue[rxValue.length() - 1] == "h") {
+                Serial.println("received alarm hour: " +
+                               (String)rxValue.c_str());
+                // TODO set alarm hour
+            } else if (rxValue.length() < 4 &&
+                       (String)rxValue[rxValue.length() - 1] == "m") {
+                Serial.println("received alarm minute: " +
+                               (String)rxValue.c_str());
+                // TODO set alarm minute
+                Serial.println("Going to sleep now");
+                esp_deep_sleep_start();
+            } else if
+ */
+            /*
             if (deviceConnected && rxValue != previousRxValue) {
                 previousRxValue = rxValue;
                 Serial.println("Sending change confirmation");
@@ -97,19 +155,16 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 pTxCharacteristic->setValue(&confirm, 1);
                 pTxCharacteristic->notify();
             }
+            */
 
             // print received value
-            Serial.println("*********");
-            Serial.print("Received Value: ");
+            /* Serial.print("Received value: ");
             for (int i = 0; i < rxValue.length(); i++) {
                 Serial.print(rxValue[i]);
             }
-            Serial.println();
-            Serial.println("*********");
+            Serial.println(); */
 
             // sleep after alarm is set
-            Serial.println("Going to sleep now");
-            esp_deep_sleep_start();
         }
     }
 };
@@ -142,7 +197,7 @@ void setup() {
     // Connect to Wi-Fi
     Serial.print("Connecting to ");
     Serial.println(ssid);
-    WiFi.begin(ssid, password);
+    WiFi.begin(ssid.c_str(), password.c_str());
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
@@ -164,7 +219,7 @@ void setup() {
 
     // Serial.println("time is " + (String)hour() + ":" + (String)minute());
     // Alarm.alarmOnce(dowWednesday, 0, 0, 30, AlarmWake);
-    
+
     // builtin led
     pinMode(2, OUTPUT);
     digitalWrite(2, ledState);
@@ -174,7 +229,7 @@ void setup() {
     // Configure Touchpad as wakeup source
     esp_sleep_enable_touchpad_wakeup();
     // set sleep wakeup after us
-    esp_sleep_enable_timer_wakeup(sleepTime*1000);
+    esp_sleep_enable_timer_wakeup(sleepTime * 1000);
 
     // START BLUETOOTH
     // Create the BLE Device
@@ -196,10 +251,10 @@ void setup() {
     // Start advertising
     pServer->getAdvertising()->start();
 
-    if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_TOUCHPAD){
+    if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_TOUCHPAD) {
+        Serial.println("Checking time and going to sleep");
         esp_deep_sleep_start();
     }
-
 }
 
 void loop() {
@@ -210,10 +265,9 @@ void loop() {
     previousMillis = millis();
     if (previousMillis >= sleepTime) {
         Serial.println("Going to sleep now");
-        //t = now();
+        // t = now();
         esp_deep_sleep_start();
     }
-    
 
     /*
         if (deviceConnected) {

@@ -137,5 +137,7 @@ public class BlinkyViewModel extends AndroidViewModel {
 	}
 
 
-
+	public void sendJson(String jsonString) {
+		blinkyManager.send(jsonString);
+	}
 }

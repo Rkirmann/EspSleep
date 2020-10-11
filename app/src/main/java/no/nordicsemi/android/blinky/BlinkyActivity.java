@@ -48,6 +48,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -239,6 +242,15 @@ public class BlinkyActivity extends AppCompatActivity {
         passwordManager.write(ssid, pw);
         // send wifi credentials
         viewModel.setWifi(ssid, pw);
+
+        // try sending json
+        try {
+            String jsonString = new JSONObject().put("name", "value").toString();
+            viewModel.sendJson(jsonString);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

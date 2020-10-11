@@ -152,6 +152,8 @@ public class BlinkyManager extends ObservableBleManager {
 	};
 
 
+
+
 	/**
 	 * BluetoothGatt callbacks object.
 	 */
@@ -233,6 +235,10 @@ public class BlinkyManager extends ObservableBleManager {
 		log(Log.VERBOSE, "Sending wifi credentials");
 		writeCharacteristic(ledCharacteristic, BlinkyLED.setSSID(ssid)).enqueue();
 		writeCharacteristic(ledCharacteristic, BlinkyLED.setPW(pw)).enqueue();
+	}
+
+	public void send(String jsonString) {
+		writeCharacteristic(ledCharacteristic,BlinkyLED.sendData(jsonString)).enqueue();
 	}
 
 

@@ -64,4 +64,9 @@ public final class BlinkyLED {
     public static Data setPW(final String pw){
         return Data.from(String.valueOf(pw));
     }
+
+    @NonNull
+    public static Data sendData(final String data){
+        return Data.from(String.valueOf(data));
+    }
 }

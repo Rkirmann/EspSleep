@@ -32,6 +32,7 @@
 #include <TimeAlarms.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <ArduinoJson.h>
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
@@ -48,8 +49,11 @@ bool oldDeviceConnected = false;
 uint8_t txValue = 0;
 uint8_t pressed = 0;
 uint8_t rxCase = 0;
+
+// RX values
 RTC_DATA_ATTR time_t t = 0;
 std::string previousRxValue = "";
+
 #define Threshold 40
 RTC_DATA_ATTR int ledState = 0;
 
@@ -115,9 +119,28 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 case 5:
                     Serial.println("received password : " + (String)rxValue.c_str());
                     password = (String)rxValue.c_str();
-                    rxCase = 0;
+                    
+                    rxCase++;
                     break;
+                case 6:
+                    Serial.println("received json : " + (String)rxValue.c_str());
+                    //JsonObject root = doc.parseObject((String)rxValue.c_str());
+                    
+                    DynamicJsonDocument doc(1024);
+                    DeserializationError error = deserializeJson(doc, (String)rxValue.c_str());
+
+                     if (error) {
+                        Serial.println("parseObject() failed");
+                        return;
+                    }
+                    const char* value = doc["name"];
+                    Serial.println(value);
+                    rxCase = 0;
             }
+
+    //        Serial.println("Sending time confirmation");
+   // pTxCharacteristic->setValue(std::string(t));
+   // pTxCharacteristic->notify();
 /* 
             if (rxValue == "+") {
                 Serial.println("recevied LED state: " +
@@ -147,6 +170,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 esp_deep_sleep_start();
             } else if
  */
+            
             /*
             if (deviceConnected && rxValue != previousRxValue) {
                 previousRxValue = rxValue;
@@ -156,6 +180,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 pTxCharacteristic->notify();
             }
             */
+            
 
             // print received value
             /* Serial.print("Received value: ");
@@ -168,6 +193,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
         }
     }
 };
+
 
 void callback() {
     // placeholder callback function
@@ -255,6 +281,8 @@ void setup() {
         Serial.println("Checking time and going to sleep");
         esp_deep_sleep_start();
     }
+
+
 }
 
 void loop() {

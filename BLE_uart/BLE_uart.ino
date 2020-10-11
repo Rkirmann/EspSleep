@@ -23,6 +23,7 @@
    function). And txValue is the data to be sent, in this example just a byte
    incremented every second.
 */
+#include <ArduinoJson.h>
 #include <BLE2902.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -32,7 +33,6 @@
 #include <TimeAlarms.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
-#include <ArduinoJson.h>
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
@@ -85,11 +85,13 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             switch (rxCase) {
                 case 0:
                     if (rxValue == "+") {
-                        Serial.println("recevied LED state: " + (String)rxValue.c_str());
+                        Serial.println("recevied LED state: " +
+                                       (String)rxValue.c_str());
                         ledState = 1;
                         digitalWrite(2, HIGH);
                     } else {
-                        Serial.println("received LED state: " + (String)rxValue.c_str());
+                        Serial.println("received LED state: " +
+                                       (String)rxValue.c_str());
                         ledState = 0;
                         digitalWrite(2, LOW);
                     }
@@ -102,75 +104,83 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                     rxCase++;
                     break;
                 case 2:
-                    Serial.println("received alarm hour: " + (String)rxValue.c_str());
-                // TODO set alarm hour
+                    Serial.println("received alarm hour: " +
+                                   (String)rxValue.c_str());
+                    // TODO set alarm hour
                     rxCase++;
                     break;
                 case 3:
-                     Serial.println("received alarm minute: " + (String)rxValue.c_str());
-                // TODO set alarm minute
+                    Serial.println("received alarm minute: " +
+                                   (String)rxValue.c_str());
+                    // TODO set alarm minute
                     rxCase++;
                     break;
                 case 4:
-                    Serial.println("received ssid : " + (String)rxValue.c_str());
+                    Serial.println("received ssid : " +
+                                   (String)rxValue.c_str());
                     ssid = (String)rxValue.c_str();
                     rxCase++;
                     break;
                 case 5:
-                    Serial.println("received password : " + (String)rxValue.c_str());
+                    Serial.println("received password : " +
+                                   (String)rxValue.c_str());
                     password = (String)rxValue.c_str();
-                    
+
                     rxCase++;
                     break;
                 case 6:
-                    Serial.println("received json : " + (String)rxValue.c_str());
-                    //JsonObject root = doc.parseObject((String)rxValue.c_str());
-                    
-                    DynamicJsonDocument doc(1024);
-                    DeserializationError error = deserializeJson(doc, (String)rxValue.c_str());
+                    Serial.println("received json : " +
+                                   (String)rxValue.c_str());
+                    // JsonObject root =
+                    // doc.parseObject((String)rxValue.c_str());
 
-                     if (error) {
+                    DynamicJsonDocument doc(1024);
+                    DeserializationError error =
+                        deserializeJson(doc, (String)rxValue.c_str(),
+                                        DeserializationOption::NestingLimit(1));
+                    serializeJson(doc, Serial);
+
+                    if (error) {
                         Serial.println("parseObject() failed");
                         return;
                     }
-                    const char* value = doc["name"];
+                    const char *value = doc["name"];
                     Serial.println(value);
                     rxCase = 0;
             }
 
-    //        Serial.println("Sending time confirmation");
-   // pTxCharacteristic->setValue(std::string(t));
-   // pTxCharacteristic->notify();
-/* 
-            if (rxValue == "+") {
-                Serial.println("recevied LED state: " +
-                               (String)rxValue.c_str());
-                ledState = 1;
-                digitalWrite(2, HIGH);
-            } else if (rxValue == "-") {
-                Serial.println("received LED state: " +
-                               (String)rxValue.c_str());
-                ledState = 0;
-                digitalWrite(2, LOW);
-            } else if (rxValue.length() > 3 && isNnumber(rxValue)) {
-                Serial.println("received time: " + (String)rxValue.c_str());
-                t = atol(rxValue.c_str());
-                setTime(t);
-            } else if (rxValue.length() < 4 &&
-                       (String)rxValue[rxValue.length() - 1] == "h") {
-                Serial.println("received alarm hour: " +
-                               (String)rxValue.c_str());
-                // TODO set alarm hour
-            } else if (rxValue.length() < 4 &&
-                       (String)rxValue[rxValue.length() - 1] == "m") {
-                Serial.println("received alarm minute: " +
-                               (String)rxValue.c_str());
-                // TODO set alarm minute
-                Serial.println("Going to sleep now");
-                esp_deep_sleep_start();
-            } else if
- */
-            
+            //        Serial.println("Sending time confirmation");
+            // pTxCharacteristic->setValue(std::string(t));
+            // pTxCharacteristic->notify();
+            /*
+                        if (rxValue == "+") {
+                            Serial.println("recevied LED state: " +
+                                           (String)rxValue.c_str());
+                            ledState = 1;
+                            digitalWrite(2, HIGH);
+                        } else if (rxValue == "-") {
+                            Serial.println("received LED state: " +
+                                           (String)rxValue.c_str());
+                            ledState = 0;
+                            digitalWrite(2, LOW);
+                        } else if (rxValue.length() > 3 && isNnumber(rxValue)) {
+                            Serial.println("received time: " +
+               (String)rxValue.c_str()); t = atol(rxValue.c_str()); setTime(t);
+                        } else if (rxValue.length() < 4 &&
+                                   (String)rxValue[rxValue.length() - 1] == "h")
+               { Serial.println("received alarm hour: " +
+                                           (String)rxValue.c_str());
+                            // TODO set alarm hour
+                        } else if (rxValue.length() < 4 &&
+                                   (String)rxValue[rxValue.length() - 1] == "m")
+               { Serial.println("received alarm minute: " +
+                                           (String)rxValue.c_str());
+                            // TODO set alarm minute
+                            Serial.println("Going to sleep now");
+                            esp_deep_sleep_start();
+                        } else if
+             */
+
             /*
             if (deviceConnected && rxValue != previousRxValue) {
                 previousRxValue = rxValue;
@@ -180,7 +190,6 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 pTxCharacteristic->notify();
             }
             */
-            
 
             // print received value
             /* Serial.print("Received value: ");
@@ -193,7 +202,6 @@ class MyCallbacks : public BLECharacteristicCallbacks {
         }
     }
 };
-
 
 void callback() {
     // placeholder callback function
@@ -281,8 +289,6 @@ void setup() {
         Serial.println("Checking time and going to sleep");
         esp_deep_sleep_start();
     }
-
-
 }
 
 void loop() {

@@ -36,8 +36,6 @@
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
-String ssid = "SuveSindi2";
-String password = "pikkwifiparool";
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 10800;
 const int daylightOffset_sec = 3600;
@@ -51,15 +49,20 @@ uint8_t pressed = 0;
 uint8_t rxCase = 0;
 
 // RX values
-RTC_DATA_ATTR time_t t = 0;
-std::string previousRxValue = "";
-
-#define Threshold 40
 RTC_DATA_ATTR int ledState = 0;
+RTC_DATA_ATTR time_t t = 0;
+RTC_DATA_ATTR int alarmHour = 0;
+RTC_DATA_ATTR int alarmMinute = 0;
+const char *ssid = "SuveSindi2";
+const char *password = "pikkwifiparool";
+
+std::string previousRxValue = "";
 
 // sleep timer
 const long sleepTime = 60000;  // go to sleep after ms
 unsigned long previousMillis = 0;
+// wakeup interrup touch button 
+#define Threshold 40 
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -82,6 +85,40 @@ class MyCallbacks : public BLECharacteristicCallbacks {
         if (rxValue.length() > 0) {
             previousMillis = 0;
 
+            Serial.println("received json : " + (String)rxValue.c_str());
+
+            DynamicJsonDocument doc(1024);
+            DeserializationError error =
+                deserializeJson(doc, (String)rxValue.c_str());
+
+            if (error) {
+                Serial.println("parseObject() failed");
+                return;
+            }
+            //assign parsed values
+            const char *led = doc["ledState"];
+            if (led == "+") {
+                        Serial.println("recevied LED state: " + String(led));
+                        ledState = 1;
+                        digitalWrite(2, HIGH);
+                    } else {
+                        Serial.println("received LED state: " + String(led));
+                        ledState = 0;
+                        digitalWrite(2, LOW);
+                    }
+            t = doc["currentTime"].as<time_t>();
+            Serial.println("recevied time: " + String(t));
+            setTime(t);
+            alarmHour = doc["alarmHour"];
+            Serial.println("recevied hour: " + String(alarmHour));
+            alarmMinute = doc["alarmMinute"];
+            Serial.println("recevied minute: " + String(alarmMinute));
+            ssid = doc["ssid"];
+            password = doc["password"];
+
+            Serial.println("ledstate: " + String(ledState) + " currentTime: " + String(t) + " alarmhour: " + String(alarmHour) + " alarmminute: " + String(alarmMinute));
+
+/* 
             switch (rxCase) {
                 case 0:
                     if (rxValue == "+") {
@@ -129,26 +166,10 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                     rxCase++;
                     break;
                 case 6:
-                    Serial.println("received json : " +
-                                   (String)rxValue.c_str());
-                    // JsonObject root =
-                    // doc.parseObject((String)rxValue.c_str());
 
-                    DynamicJsonDocument doc(1024);
-                    DeserializationError error =
-                        deserializeJson(doc, (String)rxValue.c_str(),
-                                        DeserializationOption::NestingLimit(1));
-                    serializeJson(doc, Serial);
-
-                    if (error) {
-                        Serial.println("parseObject() failed");
-                        return;
-                    }
-                    const char *value = doc["name"];
-                    Serial.println(value);
                     rxCase = 0;
             }
-
+ */
             //        Serial.println("Sending time confirmation");
             // pTxCharacteristic->setValue(std::string(t));
             // pTxCharacteristic->notify();
@@ -231,7 +252,7 @@ void setup() {
     // Connect to Wi-Fi
     Serial.print("Connecting to ");
     Serial.println(ssid);
-    WiFi.begin(ssid.c_str(), password.c_str());
+    WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");

@@ -228,29 +228,36 @@ public class BlinkyActivity extends AppCompatActivity {
     @OnClick(R.id.sync)
     public void onSyncClicked() {
         // send led state
-        viewModel.setLedState(led.isChecked());
+        //viewModel.setLedState(led.isChecked());
         // calculate local time in millis
         int offset = java.util.TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
         long now = System.currentTimeMillis() + offset;
         // send current time in seconds
-        viewModel.setTime(now / 1000L);
+        //viewModel.setTime(now / 1000L);
         // send alarm time
-        viewModel.setAlarmTime(timePicker.getHour(), timePicker.getMinute());
+        //viewModel.setAlarmTime(timePicker.getHour(), timePicker.getMinute());
         // save wifi credentials to file
         String ssid = ssidField.getText().toString();
         String pw = pwField.getText().toString();
         passwordManager.write(ssid, pw);
         // send wifi credentials
-        viewModel.setWifi(ssid, pw);
+        //viewModel.setWifi(ssid, pw);
 
         // try sending json
         try {
-            String jsonString = new JSONObject().put("name", "value").toString();
+            String jsonString = new JSONObject()
+                    .put("ledState", led.isChecked() ? "+" : "-")
+                    .put("currentTime", now /1000L)
+                    .put("alarmHour",timePicker.getHour())
+                    .put("alarmMinute", timePicker.getMinute())
+                    .put("ssid", ssidField.getText().toString())
+                    .put("password", pwField.getText().toString())
+                    .toString();
             viewModel.sendJson(jsonString);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

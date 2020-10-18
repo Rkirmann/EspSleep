@@ -246,7 +246,7 @@ public class BlinkyActivity extends AppCompatActivity {
         // try sending json
         try {
             String jsonString = new JSONObject()
-                    .put("ledState", led.isChecked() ? "+" : "-")
+                    .put("ledState", led.isChecked() ? 1 : 0)
                     .put("currentTime", now /1000L)
                     .put("alarmHour",timePicker.getHour())
                     .put("alarmMinute", timePicker.getMinute())

@@ -39,6 +39,7 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 10800;
 const int daylightOffset_sec = 3600;
+int timeout = 0;
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -49,20 +50,31 @@ uint8_t pressed = 0;
 uint8_t rxCase = 0;
 
 // RX values
-RTC_DATA_ATTR int ledState = 0;
-RTC_DATA_ATTR time_t t = 0;
-RTC_DATA_ATTR int alarmHour = 0;
-RTC_DATA_ATTR int alarmMinute = 0;
-const char *ssid = "SuveSindi2";
-const char *password = "pikkwifiparool";
+struct RTC {
+    int ledState;
+    time_t t;
+    int alarmHour;
+    int alarmMinute;
+    const char *ssid;
+    const char *password;
+};
+
+RTC_DATA_ATTR RTC rtc;
+
+int ledState = rtc.ledState;
+time_t t = rtc.t;
+int alarmHour = rtc.alarmHour;
+int alarmMinute = rtc.alarmMinute;
+const char *ssid = rtc.ssid;
+const char *password = rtc.password;
 
 std::string previousRxValue = "";
 
 // sleep timer
 const long sleepTime = 60000;  // go to sleep after ms
 unsigned long previousMillis = 0;
-// wakeup interrup touch button 
-#define Threshold 40 
+// wakeup interrup touch button
+#define Threshold 40
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -86,121 +98,58 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             previousMillis = 0;
 
             Serial.println("received json : " + (String)rxValue.c_str());
+           
 
             DynamicJsonDocument doc(1024);
             DeserializationError error =
-                deserializeJson(doc, (String)rxValue.c_str());
+                deserializeJson(doc, rxValue);
 
             if (error) {
                 Serial.println("parseObject() failed");
                 return;
             }
-            //assign parsed values
-            const char *led = doc["ledState"];
-            if (led == "+") {
-                        Serial.println("recevied LED state: " + String(led));
-                        ledState = 1;
-                        digitalWrite(2, HIGH);
-                    } else {
-                        Serial.println("received LED state: " + String(led));
-                        ledState = 0;
-                        digitalWrite(2, LOW);
-                    }
+             Serial.println(doc["ledState"].as<int>());
+            Serial.println(String(doc["currentTime"].as<time_t>()));
+            Serial.println( doc["alarmHour"].as<int>());
+            Serial.println(doc["alarmMinute"].as<int>());
+            Serial.println((String)doc["ssid"].as<const char*>());
+            Serial.println((String)doc["password"].as<const char*>());
+
+            // assign parsed values
+            ledState = doc["ledState"].as<int>();
+            Serial.println("set LED state: " + String(ledState));
+            digitalWrite(2, ledState);
+
             t = doc["currentTime"].as<time_t>();
-            Serial.println("recevied time: " + String(t));
+            Serial.println("set time: " + String(t));
             setTime(t);
-            alarmHour = doc["alarmHour"];
-            Serial.println("recevied hour: " + String(alarmHour));
-            alarmMinute = doc["alarmMinute"];
-            Serial.println("recevied minute: " + String(alarmMinute));
-            ssid = doc["ssid"];
-            password = doc["password"];
 
-            Serial.println("ledstate: " + String(ledState) + " currentTime: " + String(t) + " alarmhour: " + String(alarmHour) + " alarmminute: " + String(alarmMinute));
+            alarmHour = doc["alarmHour"].as<int>();
+            Serial.println("set hour: " + String(alarmHour));
 
-/* 
-            switch (rxCase) {
-                case 0:
-                    if (rxValue == "+") {
-                        Serial.println("recevied LED state: " +
-                                       (String)rxValue.c_str());
-                        ledState = 1;
-                        digitalWrite(2, HIGH);
-                    } else {
-                        Serial.println("received LED state: " +
-                                       (String)rxValue.c_str());
-                        ledState = 0;
-                        digitalWrite(2, LOW);
-                    }
-                    rxCase++;
-                    break;
-                case 1:
-                    Serial.println("received time: " + (String)rxValue.c_str());
-                    t = atol(rxValue.c_str());
-                    setTime(t);
-                    rxCase++;
-                    break;
-                case 2:
-                    Serial.println("received alarm hour: " +
-                                   (String)rxValue.c_str());
-                    // TODO set alarm hour
-                    rxCase++;
-                    break;
-                case 3:
-                    Serial.println("received alarm minute: " +
-                                   (String)rxValue.c_str());
-                    // TODO set alarm minute
-                    rxCase++;
-                    break;
-                case 4:
-                    Serial.println("received ssid : " +
-                                   (String)rxValue.c_str());
-                    ssid = (String)rxValue.c_str();
-                    rxCase++;
-                    break;
-                case 5:
-                    Serial.println("received password : " +
-                                   (String)rxValue.c_str());
-                    password = (String)rxValue.c_str();
+            alarmMinute = doc["alarmMinute"].as<int>();
+            Serial.println("set minute: " + String(alarmMinute));
 
-                    rxCase++;
-                    break;
-                case 6:
+            ssid = doc["ssid"].as<const char*>();
+            password = doc["password"].as<const char*>();
+            Serial.println("set credentials: " + String(ssid) + ";" +
+                           String(password));
 
-                    rxCase = 0;
-            }
- */
+            // Connect to Wi-Fi
+            connectWifi();
+
+            rtc.ledState = ledState;
+            rtc.t = t;
+            rtc.alarmHour = alarmHour;
+            rtc.alarmMinute = alarmMinute;
+            rtc.ssid = ssid;
+            rtc.password = password;
+            Serial.println("Going to sleep now");
+            esp_deep_sleep_start();
+
             //        Serial.println("Sending time confirmation");
             // pTxCharacteristic->setValue(std::string(t));
             // pTxCharacteristic->notify();
-            /*
-                        if (rxValue == "+") {
-                            Serial.println("recevied LED state: " +
-                                           (String)rxValue.c_str());
-                            ledState = 1;
-                            digitalWrite(2, HIGH);
-                        } else if (rxValue == "-") {
-                            Serial.println("received LED state: " +
-                                           (String)rxValue.c_str());
-                            ledState = 0;
-                            digitalWrite(2, LOW);
-                        } else if (rxValue.length() > 3 && isNnumber(rxValue)) {
-                            Serial.println("received time: " +
-               (String)rxValue.c_str()); t = atol(rxValue.c_str()); setTime(t);
-                        } else if (rxValue.length() < 4 &&
-                                   (String)rxValue[rxValue.length() - 1] == "h")
-               { Serial.println("received alarm hour: " +
-                                           (String)rxValue.c_str());
-                            // TODO set alarm hour
-                        } else if (rxValue.length() < 4 &&
-                                   (String)rxValue[rxValue.length() - 1] == "m")
-               { Serial.println("received alarm minute: " +
-                                           (String)rxValue.c_str());
-                            // TODO set alarm minute
-                            Serial.println("Going to sleep now");
-                            esp_deep_sleep_start();
-                        } else if
-             */
 
             /*
             if (deviceConnected && rxValue != previousRxValue) {
@@ -211,18 +160,23 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 pTxCharacteristic->notify();
             }
             */
-
-            // print received value
-            /* Serial.print("Received value: ");
-            for (int i = 0; i < rxValue.length(); i++) {
-                Serial.print(rxValue[i]);
-            }
-            Serial.println(); */
-
-            // sleep after alarm is set
         }
     }
 };
+
+void connectWifi() {
+    if (String(ssid).length() > 1) {
+        Serial.print("Connecting to ");
+        Serial.println(ssid);
+        WiFi.begin(ssid, password);
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(500);
+            Serial.print(".");
+        }
+        Serial.println("");
+        Serial.println("WiFi connected.");
+    }
+}
 
 void callback() {
     // placeholder callback function
@@ -246,28 +200,30 @@ void printDigits(int digits) {
 
 void setup() {
     Serial.begin(115200);
-    // setTime(t);
-    // t = now();
+    
+    Serial.println("ledstate:" + String(ledState));
+    Serial.println("time:" + String(t));
+    Serial.println("alarmhour:" + String(alarmHour));
+    Serial.println("alarmminute:" + String(alarmMinute));
+    Serial.println("ssid:" + String(ssid));
+    Serial.println("pass:" + String(password));
+
+    setTime(t);
+    t = now();
 
     // Connect to Wi-Fi
-    Serial.print("Connecting to ");
-    Serial.println(ssid);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println("");
-    Serial.println("WiFi connected.");
+    connectWifi();
 
-    // get set time
-    timeClient.begin();
-    timeClient.setTimeOffset(gmtOffset_sec);
-    timeClient.update();
-    // Serial.println(timeClient.getEpochTime());
-    t = timeClient.getEpochTime();
-    setTime(t);
-    digitalClockDisplay();
+    if (WiFi.status() == WL_CONNECTED) {
+        // get set time
+        timeClient.begin();
+        timeClient.setTimeOffset(gmtOffset_sec);
+        timeClient.update();
+        // Serial.println(timeClient.getEpochTime());
+        t = timeClient.getEpochTime();
+        setTime(t);
+        digitalClockDisplay();
+    }
 
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);

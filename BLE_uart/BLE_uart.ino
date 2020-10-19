@@ -55,8 +55,8 @@ struct RTC {
     time_t t;
     int alarmHour;
     int alarmMinute;
-    const char *ssid;
-    const char *password;
+    char ssid[32];
+    char password[63];
 };
 
 RTC_DATA_ATTR RTC rtc;
@@ -98,22 +98,14 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             previousMillis = 0;
 
             Serial.println("received json : " + (String)rxValue.c_str());
-           
 
             DynamicJsonDocument doc(1024);
-            DeserializationError error =
-                deserializeJson(doc, rxValue);
+            DeserializationError error = deserializeJson(doc, rxValue);
 
             if (error) {
                 Serial.println("parseObject() failed");
                 return;
             }
-             Serial.println(doc["ledState"].as<int>());
-            Serial.println(String(doc["currentTime"].as<time_t>()));
-            Serial.println( doc["alarmHour"].as<int>());
-            Serial.println(doc["alarmMinute"].as<int>());
-            Serial.println((String)doc["ssid"].as<const char*>());
-            Serial.println((String)doc["password"].as<const char*>());
 
             // assign parsed values
             ledState = doc["ledState"].as<int>();
@@ -130,20 +122,22 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             alarmMinute = doc["alarmMinute"].as<int>();
             Serial.println("set minute: " + String(alarmMinute));
 
-            ssid = doc["ssid"].as<const char*>();
-            password = doc["password"].as<const char*>();
+            ssid = doc["ssid"].as<const char *>();
+            password = doc["password"].as<const char *>();
             Serial.println("set credentials: " + String(ssid) + ";" +
                            String(password));
 
             // Connect to Wi-Fi
             connectWifi();
+            WiFi.disconnect(true);
+            WiFi.mode(WIFI_OFF);
 
             rtc.ledState = ledState;
             rtc.t = t;
             rtc.alarmHour = alarmHour;
             rtc.alarmMinute = alarmMinute;
-            rtc.ssid = ssid;
-            rtc.password = password;
+            strcpy(rtc.ssid, ssid);
+            strcpy(rtc.password, password);
             Serial.println("Going to sleep now");
             esp_deep_sleep_start();
 
@@ -165,7 +159,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 };
 
 void connectWifi() {
-    if (String(ssid).length() > 1) {
+    if (String(ssid) != "") {
         Serial.print("Connecting to ");
         Serial.println(ssid);
         WiFi.begin(ssid, password);
@@ -175,13 +169,27 @@ void connectWifi() {
         }
         Serial.println("");
         Serial.println("WiFi connected.");
+        setTimeOnline();
     }
+}
+
+void setTimeOnline() {
+    Serial.println("setting time");
+    // get set time from server
+    timeClient.begin();
+    timeClient.setTimeOffset(gmtOffset_sec);
+    timeClient.update();
+    // Serial.println(timeClient.getEpochTime());
+    t = timeClient.getEpochTime();
+    setTime(t);
+    digitalClockDisplay();
 }
 
 void callback() {
     // placeholder callback function
 }
 void AlarmWake() { Serial.println("alarm triggered at " + (String)millis()); }
+
 void digitalClockDisplay() {
     // digital clock display of the time
     Serial.print(hour());
@@ -200,7 +208,7 @@ void printDigits(int digits) {
 
 void setup() {
     Serial.begin(115200);
-    
+
     Serial.println("ledstate:" + String(ledState));
     Serial.println("time:" + String(t));
     Serial.println("alarmhour:" + String(alarmHour));
@@ -208,23 +216,11 @@ void setup() {
     Serial.println("ssid:" + String(ssid));
     Serial.println("pass:" + String(password));
 
+    //t = now();
     setTime(t);
-    t = now();
 
     // Connect to Wi-Fi
     connectWifi();
-
-    if (WiFi.status() == WL_CONNECTED) {
-        // get set time
-        timeClient.begin();
-        timeClient.setTimeOffset(gmtOffset_sec);
-        timeClient.update();
-        // Serial.println(timeClient.getEpochTime());
-        t = timeClient.getEpochTime();
-        setTime(t);
-        digitalClockDisplay();
-    }
-
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
 
@@ -241,6 +237,14 @@ void setup() {
     esp_sleep_enable_touchpad_wakeup();
     // set sleep wakeup after us
     esp_sleep_enable_timer_wakeup(sleepTime * 1000);
+
+    if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_TOUCHPAD) {
+        Serial.println("Checking time and going to sleep");
+        connectWifi();
+        WiFi.disconnect(true);
+        WiFi.mode(WIFI_OFF);
+        esp_deep_sleep_start();
+    }
 
     // START BLUETOOTH
     // Create the BLE Device
@@ -261,11 +265,6 @@ void setup() {
     pService->start();
     // Start advertising
     pServer->getAdvertising()->start();
-
-    if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_TOUCHPAD) {
-        Serial.println("Checking time and going to sleep");
-        esp_deep_sleep_start();
-    }
 }
 
 void loop() {

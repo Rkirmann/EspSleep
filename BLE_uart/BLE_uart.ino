@@ -72,6 +72,7 @@ std::string previousRxValue = "";
 
 // sleep timer
 const long sleepTime = 60000;  // go to sleep after ms
+boolean sleepOn = false;
 unsigned long previousMillis = 0;
 // wakeup interrup touch button
 #define Threshold 40
@@ -132,14 +133,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             WiFi.disconnect(true);
             WiFi.mode(WIFI_OFF);
 
-            rtc.ledState = ledState;
-            rtc.t = t;
-            rtc.alarmHour = alarmHour;
-            rtc.alarmMinute = alarmMinute;
-            strcpy(rtc.ssid, ssid);
-            strcpy(rtc.password, password);
-            Serial.println("Going to sleep now");
-            esp_deep_sleep_start();
+            sleepOn = true;
 
             //        Serial.println("Sending time confirmation");
             // pTxCharacteristic->setValue(std::string(t));
@@ -159,17 +153,26 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 };
 
 void connectWifi() {
+    int tries = 0;
     if (String(ssid) != "") {
         Serial.print("Connecting to ");
         Serial.println(ssid);
         WiFi.begin(ssid, password);
         while (WiFi.status() != WL_CONNECTED) {
+            if (tries >= 5) {
+                break;
+            }
             delay(500);
             Serial.print(".");
+            tries++;
         }
         Serial.println("");
-        Serial.println("WiFi connected.");
-        setTimeOnline();
+        if (WiFi.status() == WL_CONNECTED) {
+            Serial.println("WiFi connected.");
+            setTimeOnline();
+        } else {
+            Serial.println("unable to connect WiFi.");
+        }
     }
 }
 
@@ -190,6 +193,15 @@ void callback() {
 }
 void AlarmWake() { Serial.println("alarm triggered at " + (String)millis()); }
 
+void saveData() {
+    rtc.ledState = ledState;
+    rtc.t = now();
+    rtc.alarmHour = alarmHour;
+    rtc.alarmMinute = alarmMinute;
+    strcpy(rtc.ssid, ssid);
+    strcpy(rtc.password, password);
+}
+
 void digitalClockDisplay() {
     // digital clock display of the time
     Serial.print(hour());
@@ -200,6 +212,7 @@ void digitalClockDisplay() {
     printDigits(year());
     Serial.println();
 }
+
 void printDigits(int digits) {
     Serial.print(":");
     if (digits < 10) Serial.print('0');
@@ -215,14 +228,6 @@ void setup() {
     Serial.println("alarmminute:" + String(alarmMinute));
     Serial.println("ssid:" + String(ssid));
     Serial.println("pass:" + String(password));
-
-    //t = now();
-    setTime(t);
-
-    // Connect to Wi-Fi
-    connectWifi();
-    WiFi.disconnect(true);
-    WiFi.mode(WIFI_OFF);
 
     // Serial.println("time is " + (String)hour() + ":" + (String)minute());
     // Alarm.alarmOnce(dowWednesday, 0, 0, 30, AlarmWake);
@@ -240,11 +245,23 @@ void setup() {
 
     if (esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_TOUCHPAD) {
         Serial.println("Checking time and going to sleep");
+        setTime(t + 60);
         connectWifi();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_OFF);
+        saveData();
+        digitalClockDisplay();
         esp_deep_sleep_start();
+    } else {
+        // TODO figure out how to set time offline when button wakeup
+        setTime(t);
+        // Connect to Wi-Fi and set time if possible
+        connectWifi();
+        WiFi.disconnect(true);
+        WiFi.mode(WIFI_OFF);
     }
+
+    digitalClockDisplay();
 
     // START BLUETOOTH
     // Create the BLE Device
@@ -273,9 +290,11 @@ void loop() {
 
     // go to sleep after some time
     previousMillis = millis();
-    if (previousMillis >= sleepTime) {
+    if ((previousMillis >= sleepTime || sleepOn) /* && second() == 0 */) {
         Serial.println("Going to sleep now");
         // t = now();
+        saveData();
+        digitalClockDisplay();
         esp_deep_sleep_start();
     }
 

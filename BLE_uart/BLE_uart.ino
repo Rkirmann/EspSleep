@@ -33,11 +33,13 @@
 #include <TimeAlarms.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <string.h>
+
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
 const char *ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 10800;
+const long gmtOffset_sec = 7200;
 const int daylightOffset_sec = 3600;
 int timeout = 0;
 
@@ -51,22 +53,22 @@ uint8_t rxCase = 0;
 
 // RX values
 struct RTC {
-    int ledState;
+    byte ledState;
     time_t t;
-    int alarmHour;
-    int alarmMinute;
+    byte alarmHour;
+    byte alarmMinute;
     char ssid[32];
     char password[63];
 };
 
 RTC_DATA_ATTR RTC rtc;
 
-int ledState = rtc.ledState;
-time_t t = rtc.t;
-int alarmHour = rtc.alarmHour;
-int alarmMinute = rtc.alarmMinute;
-const char *ssid = rtc.ssid;
-const char *password = rtc.password;
+int ledState;
+time_t t;
+int alarmHour;
+int alarmMinute;
+const char *ssid;
+const char *password;
 
 std::string previousRxValue = "";
 
@@ -118,21 +120,19 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             setTime(t);
 
             alarmHour = doc["alarmHour"].as<int>();
-            Serial.println("set hour: " + String(alarmHour));
+            Serial.println("set alarm hour: " + String(alarmHour));
 
             alarmMinute = doc["alarmMinute"].as<int>();
-            Serial.println("set minute: " + String(alarmMinute));
+            Serial.println("set alarm minute: " + String(alarmMinute));
 
             ssid = doc["ssid"].as<const char *>();
             password = doc["password"].as<const char *>();
-            Serial.println("set credentials: " + String(ssid) + ";" +
-                           String(password));
+            Serial.println("set credentials: " + String(ssid) + ";" + String(password));
 
             // Connect to Wi-Fi
             connectWifi();
             WiFi.disconnect(true);
             WiFi.mode(WIFI_OFF);
-
             sleepOn = true;
 
             //        Serial.println("Sending time confirmation");
@@ -173,6 +173,8 @@ void connectWifi() {
         } else {
             Serial.println("unable to connect WiFi.");
         }
+    } else {
+        Serial.println("no WiFi credentials found");
     }
 }
 
@@ -191,15 +193,33 @@ void setTimeOnline() {
 void callback() {
     // placeholder callback function
 }
-void AlarmWake() { Serial.println("alarm triggered at " + (String)millis()); }
+
+void checkAlarm(){
+    //sunday = 1
+    //if (weekday(t) == 1 || weekday() == 1)
+    if (alarmHour == hour() && alarmMinute == minute()){
+        alarmWake();
+    }
+}
+void alarmWake() { 
+    Serial.println("alarm triggered"); 
+    digitalWrite(2, ledState);
+    }
 
 void saveData() {
+    Serial.println("Saving data");
     rtc.ledState = ledState;
     rtc.t = now();
     rtc.alarmHour = alarmHour;
     rtc.alarmMinute = alarmMinute;
+    //memset(rtc.ssid, 0, 32);
+    //memset(rtc.password, 0, 63);
     strcpy(rtc.ssid, ssid);
     strcpy(rtc.password, password);
+    
+    Serial.println("rtc credentials:");
+    Serial.println(rtc.ssid);
+    Serial.println(rtc.password);
 }
 
 void digitalClockDisplay() {
@@ -220,7 +240,17 @@ void printDigits(int digits) {
 }
 
 void setup() {
+ledState = rtc.ledState;
+t = rtc.t;
+alarmHour = rtc.alarmHour;
+alarmMinute = rtc.alarmMinute;
+ssid = rtc.ssid;
+password = rtc.password;
+
     Serial.begin(115200);
+
+    // builtin led
+    pinMode(2, OUTPUT);
 
     Serial.println("ledstate:" + String(ledState));
     Serial.println("time:" + String(t));
@@ -231,10 +261,6 @@ void setup() {
 
     // Serial.println("time is " + (String)hour() + ":" + (String)minute());
     // Alarm.alarmOnce(dowWednesday, 0, 0, 30, AlarmWake);
-
-    // builtin led
-    pinMode(2, OUTPUT);
-    digitalWrite(2, ledState);
 
     // Setup interrupt on Touch Pad 0 (GPIO2)
     touchAttachInterrupt(T0, callback, Threshold);
@@ -249,8 +275,8 @@ void setup() {
         connectWifi();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_OFF);
-        saveData();
         digitalClockDisplay();
+        checkAlarm();
         esp_deep_sleep_start();
     } else {
         // TODO figure out how to set time offline when button wakeup
@@ -259,7 +285,10 @@ void setup() {
         connectWifi();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_OFF);
+        checkAlarm();
     }
+
+    //Alarm.alarmRepeat(dowSaturday, alarmHour, alarmMinute, second(),  AlarmWake);
 
     digitalClockDisplay();
 
@@ -288,15 +317,19 @@ void loop() {
     digitalClockDisplay();
     Alarm.delay(1000);  // wait one second between clock display
 
-    // go to sleep after some time
+    // go to sleep after some time after received bluetooth data
     previousMillis = millis();
     if ((previousMillis >= sleepTime || sleepOn) /* && second() == 0 */) {
-        Serial.println("Going to sleep now");
         // t = now();
         saveData();
         digitalClockDisplay();
+        checkAlarm();
+        Serial.println("Going to sleep now");
         esp_deep_sleep_start();
     }
+
+    
+
 
     /*
         if (deviceConnected) {

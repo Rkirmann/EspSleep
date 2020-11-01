@@ -179,6 +179,7 @@ public class BlinkyActivity extends AppCompatActivity {
                     progressContainer.setVisibility(View.GONE);
                     content.setVisibility(View.VISIBLE);
                     onConnectionStateChanged(true);
+                    sync.setEnabled(true);
                     break;
                 case DISCONNECTED:
                     if (state instanceof ConnectionState.Disconnected) {
@@ -205,22 +206,26 @@ public class BlinkyActivity extends AppCompatActivity {
         pwField.addTextChangedListener(new TextWatcher() {
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.toString().trim().length()==0){
-                    sync.setEnabled(false);
-                } else {
-                    sync.setEnabled(true);
-                }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                enableDisableSync(s);
             }
 
             @Override
-            public void afterTextChanged(Editable s) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                enableDisableSync(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                enableDisableSync(s);
+            }
         });
 
 
+    }
+
+    private void enableDisableSync(CharSequence s){
+            sync.setEnabled(s.toString().trim().length() != 0);
     }
 
 

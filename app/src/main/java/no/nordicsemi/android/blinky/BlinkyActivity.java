@@ -36,6 +36,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -48,6 +49,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -87,6 +89,22 @@ public class BlinkyActivity extends AppCompatActivity {
     @BindView(R.id.sync)
     Button sync;
 
+    //days
+    @BindView(R.id.CheckBox01)
+    CheckBox monday;
+    @BindView(R.id.CheckBox02)
+    CheckBox tuesday;
+    @BindView(R.id.CheckBox03)
+    CheckBox wednesday;
+    @BindView(R.id.CheckBox04)
+    CheckBox thursday;
+    @BindView(R.id.CheckBox05)
+    CheckBox friday;
+    @BindView(R.id.CheckBox06)
+    CheckBox saturday;
+    @BindView(R.id.CheckBox07)
+    CheckBox sunday;
+
     private final BroadcastReceiver mWifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent intent) {
@@ -120,11 +138,11 @@ public class BlinkyActivity extends AppCompatActivity {
         final String deviceAddress = device.getAddress();
         passwordManager = new PasswordManager(getApplicationContext());
 
-        final MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(deviceName != null ? deviceName : getString(R.string.unknown_device));
-        toolbar.setSubtitle(deviceAddress);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //final MaterialToolbar toolbar = findViewById(R.id.toolbar);
+//        toolbar.setTitle(deviceName != null ? deviceName : getString(R.string.unknown_device));
+//        toolbar.setSubtitle(deviceAddress);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Configure the view model.
         viewModel = new ViewModelProvider(this).get(BlinkyViewModel.class);
@@ -227,21 +245,13 @@ public class BlinkyActivity extends AppCompatActivity {
     // sync button - write to esp32
     @OnClick(R.id.sync)
     public void onSyncClicked() {
-        // send led state
-        //viewModel.setLedState(led.isChecked());
         // calculate local time in millis
         int offset = java.util.TimeZone.getDefault().getRawOffset() + TimeZone.getDefault().getDSTSavings();
         long now = System.currentTimeMillis() + offset;
-        // send current time in seconds
-        //viewModel.setTime(now / 1000L);
-        // send alarm time
-        //viewModel.setAlarmTime(timePicker.getHour(), timePicker.getMinute());
         // save wifi credentials to file
         String ssid = ssidField.getText().toString();
         String pw = pwField.getText().toString();
         passwordManager.write(ssid, pw);
-        // send wifi credentials
-        //viewModel.setWifi(ssid, pw);
 
         // try sending json
         try {
@@ -252,6 +262,15 @@ public class BlinkyActivity extends AppCompatActivity {
                     .put("alarmMinute", timePicker.getMinute())
                     .put("ssid", ssidField.getText().toString())
                     .put("password", pwField.getText().toString())
+                    .put("Weekdays", new JSONArray()
+                            .put(monday.isChecked())
+                            .put(tuesday.isChecked())
+                            .put(wednesday.isChecked())
+                            .put(thursday.isChecked())
+                            .put(friday.isChecked())
+                            .put(saturday.isChecked())
+                            .put(sunday.isChecked())
+                    )
                     .toString();
             viewModel.sendJson(jsonString);
         } catch (JSONException e) {

@@ -32,14 +32,47 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
+<!--
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+             tools:visibility="gone"/>
+-->
+		<RelativeLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
 
-    </com.google.android.material.appbar.AppBarLayout>
+			<TextView
+				android:id="@+id/state_prefix"
+				android:layout_width="wrap_content"
+				android:layout_height="?attr/actionBarSize"
+				android:layout_centerVertical="true"
+				android:layout_marginStart="5dp"
+				android:gravity="center"
+				android:text="@string/state"
+				android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />/>
+
+			<com.google.android.material.textview.MaterialTextView
+				android:id="@+id/button_state"
+				android:layout_width="wrap_content"
+				android:layout_height="?attr/actionBarSize"
+				android:layout_toEndOf="@+id/state_prefix"
+				android:gravity="center"
+				android:layout_marginStart="5dp"
+				android:text="@string/button_unknown"
+				android:textAllCaps="true"
+				android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+		</RelativeLayout>
+
+
+		<!--app:layout_constraintTop_toBottomOf="@+id/button_summary"-->
+
+
+
+	</com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
         android:id="@+id/device_container"
@@ -79,13 +112,12 @@
 						android:id="@+id/ssid"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
+						android:gravity="center"
 						android:padding="@dimen/activity_horizontal_margin"
 						android:text="@string/turn_off"
 						android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
 						android:textStyle="bold"
-						android:gravity="center"
-						app:layout_constraintEnd_toStartOf="@+id/imageButton"
-						app:layout_constraintStart_toEndOf="@+id/imageButton2"
+						app:layout_constraintStart_toStartOf="@+id/wifi_password"
 						app:layout_constraintTop_toBottomOf="@+id/wifi_tool_bar" />
 
 					<ImageButton
@@ -144,7 +176,7 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:logo="@drawable/ic_toolbar_lightbulb"
+                        app:logo="@drawable/ic_baseline_wb_sunny_24"
                         app:title="@string/title_led_state"
                         app:titleMarginStart="@dimen/toolbar_title_margin" />
 
@@ -173,23 +205,24 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"
-                android:layout_marginBottom="@dimen/activity_horizontal_margin">
+                android:layout_marginTop="@dimen/activity_horizontal_margin">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
+<!--
 
-                    <TimePicker
-                        android:id="@+id/datePicker1"
-                        android:layout_width="248dp"
-                        android:layout_height="150dp"
-                        android:timePickerMode="spinner"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/button_state" />
+					<com.google.android.material.textview.MaterialTextView
+						android:id="@+id/textView"
+						android:layout_width="wrap_content"
+						android:layout_height="?attr/actionBarSize"
+						android:text="@string/state"
+						android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+						android:visibility="gone" />
+-->
 
-                    <!--<com.google.android.material.appbar.MaterialToolbar
+
+					<!--<com.google.android.material.appbar.MaterialToolbar
                         android:id="@+id/button_tool_bar"
                         android:layout_width="0dp"
                         android:layout_height="?actionBarSize"
@@ -211,31 +244,19 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/button_tool_bar" />  -->
 
-					<com.google.android.material.textview.MaterialTextView
-						android:id="@+id/textView"
-						android:layout_width="0dp"
-						android:layout_height="wrap_content"
-						android:padding="@dimen/activity_horizontal_margin"
-						android:text="@string/state"
-						android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+
+					<TimePicker
+						android:id="@+id/datePicker1"
+						android:layout_width="248dp"
+						android:layout_height="150dp"
+						android:timePickerMode="spinner"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintHorizontal_bias="0.496"
 						app:layout_constraintLeft_toLeftOf="parent"
-						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintRight_toRightOf="parent"
 						app:layout_constraintTop_toTopOf="parent" />
-                    <!--app:layout_constraintTop_toBottomOf="@+id/button_summary"-->
 
-                    <com.google.android.material.textview.MaterialTextView
-                        android:id="@+id/button_state"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:padding="@dimen/activity_horizontal_margin"
-                        android:text="@string/button_unknown"
-                        android:textAllCaps="true"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                        app:layout_constraintBaseline_toBaselineOf="@+id/textView"
-                        app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/textView" />
-
-                    <Button
+					<Button
                         android:id="@+id/sync"
                         android:layout_width="75dp"
                         android:layout_height="45dp"
@@ -247,6 +268,242 @@
                         app:layout_constraintTop_toTopOf="@+id/datePicker1" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
+
+			<com.google.android.material.card.MaterialCardView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="match_parent"
+					android:layout_height="match_parent">
+
+					<com.google.android.material.appbar.MaterialToolbar
+						android:id="@+id/repeat_tool_bar"
+						android:layout_width="0dp"
+						android:layout_height="?actionBarSize"
+						app:layout_constraintLeft_toLeftOf="parent"
+						app:layout_constraintRight_toRightOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						app:logo="@drawable/ic_baseline_repeat_24"
+						app:title="@string/title_repeat"
+						app:titleMarginStart="@dimen/toolbar_title_margin" />
+
+					<RelativeLayout
+						android:id="@+id/checkContainer01"
+						android:layout_width="0dp"
+						android:layout_height="fill_parent"
+						android:layout_marginStart="16dp"
+						android:orientation="horizontal"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toBottomOf="@id/repeat_tool_bar">
+
+						<TextView
+							android:id="@+id/rowTextView01"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:layout_alignParentStart="true"
+							android:layout_marginStart="0dp"
+							android:gravity="center"
+							android:padding="5dp"
+							android:text="Mon"
+							android:textSize="16sp"></TextView>
+
+						<CheckBox
+							android:id="@+id/CheckBox01"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_below="@+id/rowTextView01"
+							android:layout_alignParentStart="true"
+							android:focusable="false"
+							android:padding="5dp"></CheckBox>
+					</RelativeLayout>
+
+					<RelativeLayout
+						android:id="@+id/checkContainer02"
+						android:layout_width="0dp"
+						android:layout_height="fill_parent"
+						android:orientation="horizontal"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/checkContainer01"
+						app:layout_constraintTop_toBottomOf="@id/repeat_tool_bar">
+
+						<TextView
+							android:id="@+id/rowTextView02"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:layout_alignParentStart="true"
+							android:layout_marginStart="0dp"
+							android:gravity="center"
+							android:padding="5dp"
+							android:text="Tue"
+							android:textSize="16sp"></TextView>
+						<CheckBox
+							android:id="@+id/CheckBox02"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_below="@+id/rowTextView02"
+							android:focusable="false"
+							android:gravity="center"
+							android:padding="5dp">
+						</CheckBox>
+					</RelativeLayout>
+
+					<RelativeLayout
+						android:id="@+id/checkContainer03"
+						android:layout_width="0dp"
+						android:layout_height="fill_parent"
+						android:orientation="horizontal"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/checkContainer02"
+						app:layout_constraintTop_toBottomOf="@id/repeat_tool_bar">
+
+						<TextView
+							android:id="@+id/rowTextView03"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:layout_alignParentStart="true"
+							android:layout_marginStart="0dp"
+							android:gravity="center"
+							android:padding="5dp"
+							android:text="Wed"
+							android:textSize="16sp"></TextView>
+						<CheckBox
+							android:id="@+id/CheckBox03"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_below="@+id/rowTextView03"
+							android:focusable="false"
+							android:gravity="center"
+							android:padding="5dp">
+						</CheckBox>
+					</RelativeLayout>
+
+					<RelativeLayout
+						android:id="@+id/checkContainer04"
+						android:layout_width="0dp"
+						android:layout_height="fill_parent"
+						android:orientation="horizontal"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/checkContainer03"
+						app:layout_constraintTop_toBottomOf="@id/repeat_tool_bar">
+
+						<TextView
+							android:id="@+id/rowTextView04"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:layout_alignParentStart="true"
+							android:layout_marginStart="0dp"
+							android:gravity="center"
+							android:padding="5dp"
+							android:text="Thu"
+							android:textSize="16sp"></TextView>
+						<CheckBox
+							android:id="@+id/CheckBox04"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_below="@+id/rowTextView04"
+							android:focusable="false"
+							android:gravity="center"
+							android:padding="5dp">
+						</CheckBox>
+					</RelativeLayout>
+
+					<RelativeLayout
+						android:id="@+id/checkContainer05"
+						android:layout_width="0dp"
+						android:layout_height="fill_parent"
+						android:orientation="horizontal"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/checkContainer04"
+						app:layout_constraintTop_toBottomOf="@id/repeat_tool_bar">
+
+						<TextView
+							android:id="@+id/rowTextView05"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:layout_alignParentStart="true"
+							android:layout_marginStart="0dp"
+							android:gravity="center"
+							android:padding="5dp"
+							android:text="Fri"
+							android:textSize="16sp"></TextView>
+						<CheckBox
+							android:id="@+id/CheckBox05"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_below="@+id/rowTextView05"
+							android:focusable="false"
+							android:gravity="center"
+							android:padding="5dp">
+						</CheckBox>
+					</RelativeLayout>
+
+					<RelativeLayout
+						android:id="@+id/checkContainer06"
+						android:layout_width="0dp"
+						android:layout_height="fill_parent"
+						android:orientation="horizontal"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/checkContainer05"
+						app:layout_constraintTop_toBottomOf="@id/repeat_tool_bar">
+
+						<TextView
+							android:id="@+id/rowTextView06"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:layout_alignParentStart="true"
+							android:layout_marginStart="0dp"
+							android:gravity="center"
+							android:padding="5dp"
+							android:text="Sat"
+							android:textSize="16sp"></TextView>
+						<CheckBox
+							android:id="@+id/CheckBox06"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_below="@+id/rowTextView06"
+							android:focusable="false"
+							android:gravity="center"
+							android:padding="5dp">
+						</CheckBox>
+					</RelativeLayout>
+
+					<RelativeLayout
+						android:id="@+id/checkContainer07"
+						android:layout_width="0dp"
+						android:layout_height="fill_parent"
+						android:orientation="horizontal"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintStart_toEndOf="@+id/checkContainer06"
+						app:layout_constraintTop_toBottomOf="@id/repeat_tool_bar">
+
+						<TextView
+							android:id="@+id/rowTextView07"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:layout_alignParentStart="true"
+							android:layout_marginStart="0dp"
+							android:gravity="center"
+							android:padding="5dp"
+							android:text="Sun"
+							android:textSize="16sp"></TextView>
+						<CheckBox
+							android:id="@+id/CheckBox07"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_below="@+id/rowTextView07"
+							android:focusable="false"
+							android:gravity="center"
+							android:padding="5dp">
+						</CheckBox>
+					</RelativeLayout>
+
+
+
+				</androidx.constraintlayout.widget.ConstraintLayout>
+			</com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
 

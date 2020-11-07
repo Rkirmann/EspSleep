@@ -59,6 +59,7 @@ struct RTC {
     byte alarmMinute;
     char ssid[32];
     char password[63];
+    bool weekDays[7];
 };
 
 RTC_DATA_ATTR RTC rtc;
@@ -69,6 +70,7 @@ int alarmHour;
 int alarmMinute;
 const char *ssid;
 const char *password;
+bool weekDays[7];
 
 std::string previousRxValue = "";
 
@@ -127,7 +129,18 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 
             ssid = doc["ssid"].as<const char *>();
             password = doc["password"].as<const char *>();
-            Serial.println("set credentials: " + String(ssid) + ";" + String(password));
+            Serial.println("set credentials: " + String(ssid) + ";" +
+                           String(password));
+
+            // weekDays = doc["weekDays"].as<JsonArray>();
+            // for (JsonObject repo : doc.as<JsonArray>()) {
+            //   weekDays[]  repo.as<bool>()
+            // }
+            for (int i = 0; i < 7; i++) {
+                weekDays[i] = doc["weekDays"][i];
+                Serial.print("day" + String(i+1) + ": " + String(weekDays[i]) + "; ");
+            } 
+            Serial.println();
 
             // Connect to Wi-Fi
             connectWifi();
@@ -194,17 +207,17 @@ void callback() {
     // placeholder callback function
 }
 
-void checkAlarm(){
-    //sunday = 1
-    //if (weekday(t) == 1 || weekday() == 1)
-    if (alarmHour == hour() && alarmMinute == minute()){
+void checkAlarm() {
+    // sunday = 1
+    // if (weekday(t) == 1 || weekday() == 1)
+    if (alarmHour == hour() && alarmMinute == minute()) {
         alarmWake();
     }
 }
-void alarmWake() { 
-    Serial.println("alarm triggered"); 
+void alarmWake() {
+    Serial.println("alarm triggered");
     digitalWrite(2, ledState);
-    }
+}
 
 void saveData() {
     Serial.println("Saving data");
@@ -212,11 +225,20 @@ void saveData() {
     rtc.t = now();
     rtc.alarmHour = alarmHour;
     rtc.alarmMinute = alarmMinute;
-    //memset(rtc.ssid, 0, 32);
-    //memset(rtc.password, 0, 63);
-    strcpy(rtc.ssid, ssid);
-    strcpy(rtc.password, password);
+    for (int i = 0; i < 32; i++) {
+        rtc.ssid[i] = ssid[i];
+    }
+    for (int i = 0; i < 63; i++) {
+        rtc.password[i] = password[i];
+    }
+    //strcpy(rtc.ssid, ssid);
+    //strcpy(rtc.password, password);
     
+    //memcpy(rtc.weekDays, weekDays, 7);
+    for (int i = 0; i < 7; i++) {
+        rtc.weekDays[i] = weekDays[i];
+    }
+
     Serial.println("rtc credentials:");
     Serial.println(rtc.ssid);
     Serial.println(rtc.password);
@@ -227,6 +249,7 @@ void digitalClockDisplay() {
     Serial.print(hour());
     printDigits(minute());
     printDigits(second());
+    Serial.print(" ");
     printDigits(day());
     printDigits(month());
     printDigits(year());
@@ -240,12 +263,15 @@ void printDigits(int digits) {
 }
 
 void setup() {
-ledState = rtc.ledState;
-t = rtc.t;
-alarmHour = rtc.alarmHour;
-alarmMinute = rtc.alarmMinute;
-ssid = rtc.ssid;
-password = rtc.password;
+    ledState = rtc.ledState;
+    t = rtc.t;
+    alarmHour = rtc.alarmHour;
+    alarmMinute = rtc.alarmMinute;
+    ssid = rtc.ssid;
+    password = rtc.password;
+    for (int i = 0; i < 7; i++) {
+        weekDays[i] = rtc.weekDays[i];
+    }
 
     Serial.begin(115200);
 
@@ -258,9 +284,10 @@ password = rtc.password;
     Serial.println("alarmminute:" + String(alarmMinute));
     Serial.println("ssid:" + String(ssid));
     Serial.println("pass:" + String(password));
-
-    // Serial.println("time is " + (String)hour() + ":" + (String)minute());
-    // Alarm.alarmOnce(dowWednesday, 0, 0, 30, AlarmWake);
+    for (int i = 0; i < 7; i++) {
+        Serial.print("day" + String(i+1) + ": " + String(weekDays[i]) + "; ");
+    }
+    Serial.println();
 
     // Setup interrupt on Touch Pad 0 (GPIO2)
     touchAttachInterrupt(T0, callback, Threshold);
@@ -275,7 +302,6 @@ password = rtc.password;
         connectWifi();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_OFF);
-        digitalClockDisplay();
         checkAlarm();
         esp_deep_sleep_start();
     } else {
@@ -288,7 +314,8 @@ password = rtc.password;
         checkAlarm();
     }
 
-    //Alarm.alarmRepeat(dowSaturday, alarmHour, alarmMinute, second(),  AlarmWake);
+    // Alarm.alarmRepeat(dowSaturday, alarmHour, alarmMinute, second(),
+    // AlarmWake);
 
     digitalClockDisplay();
 
@@ -327,9 +354,6 @@ void loop() {
         Serial.println("Going to sleep now");
         esp_deep_sleep_start();
     }
-
-    
-
 
     /*
         if (deviceConnected) {

@@ -267,7 +267,7 @@ public class BlinkyActivity extends AppCompatActivity {
                     .put("alarmMinute", timePicker.getMinute())
                     .put("ssid", ssidField.getText().toString())
                     .put("password", pwField.getText().toString())
-                    .put("Weekdays", new JSONArray()
+                    .put("weekDays", new JSONArray()
                             .put(monday.isChecked())
                             .put(tuesday.isChecked())
                             .put(wednesday.isChecked())

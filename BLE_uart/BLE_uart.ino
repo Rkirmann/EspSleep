@@ -138,8 +138,9 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             // }
             for (int i = 0; i < 7; i++) {
                 weekDays[i] = doc["weekDays"][i];
-                Serial.print("day" + String(i+1) + ": " + String(weekDays[i]) + "; ");
-            } 
+                Serial.print("day" + String(i + 1) + ": " +
+                             String(weekDays[i]) + "; ");
+            }
             Serial.println();
 
             // Connect to Wi-Fi
@@ -210,9 +211,11 @@ void callback() {
 void checkAlarm() {
     // sunday = 1
     // if (weekday(t) == 1 || weekday() == 1)
-    if (alarmHour == hour() && alarmMinute == minute()) {
+    int index = weekday() == 1 ? 6 : weekday() - 2;
+    if (ledState == 1 && weekDays[index] && alarmHour == hour() && alarmMinute == minute()){
         alarmWake();
     }
+     
 }
 void alarmWake() {
     Serial.println("alarm triggered");
@@ -231,10 +234,10 @@ void saveData() {
     for (int i = 0; i < 63; i++) {
         rtc.password[i] = password[i];
     }
-    //strcpy(rtc.ssid, ssid);
-    //strcpy(rtc.password, password);
-    
-    //memcpy(rtc.weekDays, weekDays, 7);
+    // strcpy(rtc.ssid, ssid);
+    // strcpy(rtc.password, password);
+
+    // memcpy(rtc.weekDays, weekDays, 7);
     for (int i = 0; i < 7; i++) {
         rtc.weekDays[i] = weekDays[i];
     }
@@ -285,7 +288,7 @@ void setup() {
     Serial.println("ssid:" + String(ssid));
     Serial.println("pass:" + String(password));
     for (int i = 0; i < 7; i++) {
-        Serial.print("day" + String(i+1) + ": " + String(weekDays[i]) + "; ");
+        Serial.print("day" + String(i + 1) + ": " + String(weekDays[i]) + "; ");
     }
     Serial.println();
 

@@ -37,6 +37,7 @@
 	<string name="title_repeat">Repeat</string>
 	<string name="password">Password</string>
 	<string name="title_button_state">Button</string>
+	<string name="title_led_slider">Duration</string>
 	<string name="state">Current wakeup-time: </string>
 	<string name="button_pressed">Pressed</string>
 	<string name="button_released">Released</string>

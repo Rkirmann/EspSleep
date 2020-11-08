@@ -39,6 +39,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -46,15 +47,12 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.List;
 
 import butterknife.BindView;
@@ -88,6 +86,10 @@ public class BlinkyActivity extends AppCompatActivity {
     TimePicker timePicker;
     @BindView(R.id.sync)
     Button sync;
+    @BindView(R.id.seekBar1)
+    SeekBar seekBar;
+    @BindView(R.id.seekBarTextview)
+    TextView seekBarTextview;
 
     //days
     @BindView(R.id.CheckBox01)
@@ -218,6 +220,20 @@ public class BlinkyActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 enableDisableSync(s);
+            }
+        });
+
+        seekBarTextview.setText(seekBar.getProgress() + "/" + seekBar.getMax() + " min");
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBarTextview.setText(progress + "/" + seekBar.getMax() + " min");
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
 

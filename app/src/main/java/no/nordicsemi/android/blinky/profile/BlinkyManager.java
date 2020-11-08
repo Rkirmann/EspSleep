@@ -191,52 +191,6 @@ public class BlinkyManager extends ObservableBleManager {
 		}
 	}
 
-	/**
-	 * Sends a request to the device to turn the LED on or off.
-	 *
-	 * @param on true to turn the LED on, false to turn it off.
-	 */
-	public void turnLed(final boolean on) {
-		// Are we connected?
-		if (ledCharacteristic == null)
-			return;
-		// No need to change?
-		//if (ledOn == on)
-		//	return;
-		log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
-		writeCharacteristic(ledCharacteristic,
-				on ? BlinkyLED.turnOn() : BlinkyLED.turnOff())
-				.with(ledCallback).enqueue();
-	}
-
-	/**
-	 * Sends time
-	 * The value is the number of seconds since Jan 1, 1970
-	 * */
-	public void sendTime(final long sec){
-		// Are we connected?
-		if (ledCharacteristic == null)
-			return;
-		log(Log.VERBOSE, "Sending time in sec: " + sec + "...");
-		writeCharacteristic(ledCharacteristic, BlinkyLED.setTime(sec)).enqueue();
-	}
-
-	public void sendAlarm(int hour, int minute) {
-		if (ledCharacteristic == null)
-			return;
-		log(Log.VERBOSE, "Sending alarm: " + hour + ";" + minute +"...");
-		writeCharacteristic(ledCharacteristic, BlinkyLED.setAlarmHour(hour)).enqueue();
-		writeCharacteristic(ledCharacteristic, BlinkyLED.setAlarmMinute(minute)).enqueue();
-	}
-
-	public void sendWifiCredentials(String ssid, String pw) {
-		if (ledCharacteristic == null)
-			return;
-		log(Log.VERBOSE, "Sending wifi credentials");
-		writeCharacteristic(ledCharacteristic, BlinkyLED.setSSID(ssid)).enqueue();
-		writeCharacteristic(ledCharacteristic, BlinkyLED.setPW(pw)).enqueue();
-	}
-
 	public void send(String jsonString) {
 		writeCharacteristic(ledCharacteristic,BlinkyLED.sendData(jsonString)).enqueue();
 	}

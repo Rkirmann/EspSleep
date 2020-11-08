@@ -78,6 +78,7 @@ std::string previousRxValue = "";
 const long sleepTime = 60000;  // go to sleep after ms
 boolean sleepOn = false;
 unsigned long previousMillis = 0;
+
 // wakeup interrup touch button
 #define Threshold 40
 
@@ -132,10 +133,6 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             Serial.println("set credentials: " + String(ssid) + ";" +
                            String(password));
 
-            // weekDays = doc["weekDays"].as<JsonArray>();
-            // for (JsonObject repo : doc.as<JsonArray>()) {
-            //   weekDays[]  repo.as<bool>()
-            // }
             for (int i = 0; i < 7; i++) {
                 weekDays[i] = doc["weekDays"][i];
                 Serial.print("day" + String(i + 1) + ": " +
@@ -153,7 +150,6 @@ class MyCallbacks : public BLECharacteristicCallbacks {
             // pTxCharacteristic->setValue(std::string(t));
             // pTxCharacteristic->notify();
 
-            /*
             if (deviceConnected && rxValue != previousRxValue) {
                 previousRxValue = rxValue;
                 Serial.println("Sending change confirmation");
@@ -161,7 +157,6 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                 pTxCharacteristic->setValue(&confirm, 1);
                 pTxCharacteristic->notify();
             }
-            */
         }
     }
 };
@@ -209,17 +204,32 @@ void callback() {
 }
 
 void checkAlarm() {
-    // sunday = 1
-    // if (weekday(t) == 1 || weekday() == 1)
+    // weekday() sunday = 1
     int index = weekday() == 1 ? 6 : weekday() - 2;
-    if (ledState == 1 && weekDays[index] && alarmHour == hour() && alarmMinute == minute()){
+    if (ledState == 1 && weekDays[index] && alarmHour == hour() &&
+        alarmMinute == minute()) {
         alarmWake();
     }
-     
 }
 void alarmWake() {
+    // TODO smooth transition
     Serial.println("alarm triggered");
-    digitalWrite(2, ledState);
+    // digitalWrite(2, ledState);
+
+    int brightness = 0;
+    //minutes to us
+    int duration = 0.5 * 60000;
+    // linear fade in calc
+    float R = (255 * log10(2)) / (log10(255));
+
+    unsigned long delayIncrement = duration / 255;
+    for (int fadeValue = 0; fadeValue <= 255; fadeValue++) {
+        // linear brightness calculation
+        brightness = pow(2, (fadeValue / R)) - 1;
+        //analogWrite(2, brightness);
+        ledcWrite(0, brightness);
+        delay(delayIncrement);
+    }
 }
 
 void saveData() {
@@ -279,7 +289,11 @@ void setup() {
     Serial.begin(115200);
 
     // builtin led
-    pinMode(2, OUTPUT);
+    // pinMode(2, OUTPUT);
+    // configure LED PWM functionalitites
+    ledcSetup(0, 5000, 8);
+    // attach the channel to the GPIO to be controlled
+    ledcAttachPin(2, 0);
 
     Serial.println("ledstate:" + String(ledState));
     Serial.println("time:" + String(t));
@@ -310,15 +324,11 @@ void setup() {
     } else {
         // TODO figure out how to set time offline when button wakeup
         setTime(t);
-        // Connect to Wi-Fi and set time if possible
         connectWifi();
         WiFi.disconnect(true);
         WiFi.mode(WIFI_OFF);
         checkAlarm();
     }
-
-    // Alarm.alarmRepeat(dowSaturday, alarmHour, alarmMinute, second(),
-    // AlarmWake);
 
     digitalClockDisplay();
 
@@ -341,6 +351,16 @@ void setup() {
     pService->start();
     // Start advertising
     pServer->getAdvertising()->start();
+
+    // if (deviceConnected) {
+    //       uint8_t btn = touchRead(T0);
+    //       btn > 40 ? pressed = 0 : pressed = 1;
+    //       //Serial.println(btn);
+    //         //pTxCharacteristic->setValue(&txValue, 1);
+    //         pTxCharacteristic->setValue(&pressed, 1);
+    //         pTxCharacteristic->notify();
+    //         //txValue++;
+    //         }
 }
 
 void loop() {

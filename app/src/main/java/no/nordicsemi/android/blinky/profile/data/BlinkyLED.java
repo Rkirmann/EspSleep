@@ -27,44 +27,6 @@ import androidx.annotation.NonNull;
 import no.nordicsemi.android.ble.data.Data;
 
 public final class BlinkyLED {
-    private static final char STATE_OFF = '-';
-    private static final char STATE_ON = '+';
-
-    @NonNull
-    public static Data turnOn() {
-        return Data.opCode( (byte) STATE_ON);
-    }
-
-    @NonNull
-    public static Data turnOff() {
-        return Data.opCode( (byte) STATE_OFF);
-    }
-
-    @NonNull
-    public static Data setTime(final long sec){
-        return Data.from(String.valueOf(sec));
-    }
-
-    @NonNull
-    public static Data setAlarmHour(final int hour){
-        return Data.from(String.valueOf(hour)+'h');
-    }
-
-    @NonNull
-    public static Data setAlarmMinute(final int minute){
-        return Data.from(String.valueOf(minute)+'m');
-    }
-
-    @NonNull
-    public static Data setSSID(final String ssid){
-        return Data.from(String.valueOf(ssid));
-    }
-
-    @NonNull
-    public static Data setPW(final String pw){
-        return Data.from(String.valueOf(pw));
-    }
-
     @NonNull
     public static Data sendData(final String data){
         return Data.from(String.valueOf(data));

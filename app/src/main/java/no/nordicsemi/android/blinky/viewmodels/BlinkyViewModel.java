@@ -95,39 +95,6 @@ public class BlinkyViewModel extends AndroidViewModel {
 		blinkyManager.disconnect().enqueue();
 	}
 
-	/**
-	 * Sends a command to turn ON or OFF the LED on the nRF5 DK.
-	 *
-	 * @param on true to turn the LED on, false to turn it OFF.
-	 */
-	public void setLedState(final boolean on) {
-		blinkyManager.turnLed(on);
-	}
-
-	/**
-	 * Sends time
-	 * The value is the number of seconds since Jan 1, 1970
-	* */
-	public void setTime(final long sec){
-		blinkyManager.sendTime(sec);
-	}
-
-	/**
-	 * Sends alarm time
-	 * The value is int hour and int minute
-	 * */
-	public void setAlarmTime(int hour, int minute) {
-		blinkyManager.sendAlarm(hour, minute);
-	}
-
-	/**
-	 * Sends wifi credentials
-	 * The value string ssid and pw
-	 * */
-	public void setWifi(String ssid, String pw) {
-		blinkyManager.sendWifiCredentials(ssid, pw);
-	}
-
 	@Override
 	protected void onCleared() {
 		super.onCleared();

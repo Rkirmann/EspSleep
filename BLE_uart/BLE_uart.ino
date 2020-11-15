@@ -60,6 +60,7 @@ struct RTC {
     char ssid[32];
     char password[63];
     bool weekDays[7];
+    int duration;
 };
 
 RTC_DATA_ATTR RTC rtc;
@@ -71,6 +72,7 @@ int alarmMinute;
 const char *ssid;
 const char *password;
 bool weekDays[7];
+int duration;
 
 std::string previousRxValue = "";
 
@@ -139,6 +141,9 @@ class MyCallbacks : public BLECharacteristicCallbacks {
                              String(weekDays[i]) + "; ");
             }
             Serial.println();
+
+            duration = doc["duration"].as<int>();
+            Serial.println("duration: " + String(duration));
 
             // Connect to Wi-Fi
             connectWifi();
@@ -218,17 +223,20 @@ void alarmWake() {
 
     int brightness = 0;
     //minutes to us
-    int duration = 0.5 * 60000;
+    int dur = duration * 60000;
     // linear fade in calc
     float R = (255 * log10(2)) / (log10(255));
 
-    unsigned long delayIncrement = duration / 255;
+    unsigned long delayIncrement = dur / 255;
     for (int fadeValue = 0; fadeValue <= 255; fadeValue++) {
         // linear brightness calculation
         brightness = pow(2, (fadeValue / R)) - 1;
         //analogWrite(2, brightness);
         ledcWrite(0, brightness);
         delay(delayIncrement);
+    }
+    while (touchRead(T0) < 40){
+        ;
     }
 }
 
@@ -244,6 +252,7 @@ void saveData() {
     for (int i = 0; i < 63; i++) {
         rtc.password[i] = password[i];
     }
+    rtc.duration = duration;
     // strcpy(rtc.ssid, ssid);
     // strcpy(rtc.password, password);
 
@@ -285,6 +294,7 @@ void setup() {
     for (int i = 0; i < 7; i++) {
         weekDays[i] = rtc.weekDays[i];
     }
+    duration = rtc.duration;
 
     Serial.begin(115200);
 

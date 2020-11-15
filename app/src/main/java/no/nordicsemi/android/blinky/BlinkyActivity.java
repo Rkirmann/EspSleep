@@ -223,11 +223,11 @@ public class BlinkyActivity extends AppCompatActivity {
             }
         });
 
-        seekBarTextview.setText(seekBar.getProgress() + "/" + seekBar.getMax() + " min");
+        seekBarTextview.setText(seekBar.getProgress() + " min");
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                seekBarTextview.setText(progress + "/" + seekBar.getMax() + " min");
+                seekBarTextview.setText(progress + " min");
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -292,6 +292,7 @@ public class BlinkyActivity extends AppCompatActivity {
                             .put(saturday.isChecked())
                             .put(sunday.isChecked())
                     )
+                    .put("duration", seekBar.getProgress())
                     .toString();
             viewModel.sendJson(jsonString);
         } catch (JSONException e) {
